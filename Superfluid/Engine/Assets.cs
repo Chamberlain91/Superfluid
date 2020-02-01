@@ -51,6 +51,14 @@ namespace Superfluid.Engine
             Image.CreateAtlas(_images.Values);
         }
 
+        public static void SetImagesCenterOrigin(params string[] prefixes)
+        {
+            foreach (var prefix in prefixes)
+            {
+                SetImagesCenterOrigin(prefix);
+            }
+        }
+
         public static void SetImagesCenterOrigin(string prefix)
         {
             var names = ImageNames.Where(name => name.StartsWith(prefix));

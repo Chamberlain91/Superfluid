@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 using Heirloom.Desktop;
 using Heirloom.Drawing;
@@ -13,6 +12,10 @@ namespace Superfluid.Actors
     public class Player : Actor
     {
         public const float WalkSpeed = 4;
+
+        public const float ShootRate = 0.33F;
+
+        private float _shootTime = ShootRate;
 
         public Player(Sprite sprite)
             : base(sprite)
@@ -46,14 +49,25 @@ namespace Superfluid.Actors
             Velocity = (0, Velocity.Y);
 
             // Shooting input
-            DetectShoot();
+            DetectShoot(dt);
         }
 
-        private void DetectShoot()
+        private void DetectShoot(float dt)
         {
-            if (KeyShoot)
+            _shootTime -= dt;
+
+            if (KeyShoot && _shootTime <= 0F)
             {
+                _shootTime = ShootRate;
+
+                var mouseWorld = Game.ScreenToWorld * Input.MousePosition;
+                var dir = (mouseWorld - Transform.Position).Normalized;
+
+                // 
                 var laser = new Laser();
+                laser.Transform.Position = Transform.Position;
+                laser.Transform.Direction = dir;
+
                 Game.AddEntity(laser);
             }
         }
@@ -68,14 +82,14 @@ namespace Superfluid.Actors
             }
 
             // Shooting input
-            DetectShoot();
+            DetectShoot(dt);
         }
 
         protected override void JumpUpdate(float dt)
         {
             WantFallDown = false;
             DetectMovement();
-            DetectShoot();
+            DetectShoot(dt);
         }
 
         protected override void HurtUpdate(float dt)

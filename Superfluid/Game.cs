@@ -27,6 +27,8 @@ namespace Superfluid
 
         public static BoundingTreeSpatialCollection<ISpatialObject> Spatial { get; private set; }
 
+        public static Matrix ScreenToWorld;
+
         public static Color BackgroundColor = Color.Parse("#95A5A6");
 
         private static HashSet<Entity> _addSet, _remSet;
@@ -59,7 +61,7 @@ namespace Superfluid
                 Assets.PackAtlas();
 
                 // Center origins on assets prefixed by string given
-                Assets.SetImagesCenterOrigin("crosshair102");
+                Assets.SetImagesCenterOrigin("crosshair102", "particle");
                 Assets.SetImagesCenterOrigin("alien"); // alienpink_walk1, etc
 
                 // Sets the cursor
@@ -82,10 +84,11 @@ namespace Superfluid
             });
         }
 
-        public static void AddEntity(Entity entity)
+        public static T AddEntity<T>(T entity) where T : Entity
         {
             _remSet.Remove(entity);
             _addSet.Add(entity);
+            return entity;
         }
 
         public static void RemoveEntity(Entity entity)
@@ -212,7 +215,9 @@ namespace Superfluid
 
             // "Camera"
             var offset = ((Vector) gfx.Surface.Size - (stageWidth, stageHeight)) / 2F;
-            gfx.GlobalTransform = Matrix.CreateTranslation((IntVector) offset);
+            var cameraMatrix = Matrix.CreateTranslation((IntVector) offset);
+            ScreenToWorld = Matrix.Inverse(cameraMatrix);
+            gfx.GlobalTransform = cameraMatrix;
 
             // Draws the background image and frame
             DrawBackground(gfx);

@@ -243,7 +243,7 @@ namespace Superfluid.Engine
         {
             // Draw State
             gfx.Color = Color.Magenta;
-            gfx.DrawText($"State: {_stateMachine.State}\n{WantFallDown}", Transform.Position, Font.Default, 32);
+            gfx.DrawText($"State: {_stateMachine.State}\nWant Fall: {WantFallDown}", Transform.Position, Font.Default, 32);
 
             // Draw Bounds
             gfx.Color = Color.Green;
