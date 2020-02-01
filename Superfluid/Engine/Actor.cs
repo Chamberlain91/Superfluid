@@ -81,8 +81,11 @@ namespace Superfluid.Engine
             Velocity += Vector.Down * 0.33F;
 
             // 
-            IntegrateHorizontal();
-            IntegrateVertical();
+            IntegrateHorizontal(dt);
+            IntegrateVertical(dt);
+
+            // 
+            Velocity = (Velocity.X * 0.33F, Velocity.Y);
 
             // 
             AdvanceAnimation(dt);
@@ -91,7 +94,7 @@ namespace Superfluid.Engine
             _stateMachine.Update(dt);
         }
 
-        private void IntegrateHorizontal()
+        private void IntegrateHorizontal(float dt)
         {
             Transform.Position += (Velocity.X, 0);
             ComputeBounds();
@@ -140,7 +143,7 @@ namespace Superfluid.Engine
             }
         }
 
-        private void IntegrateVertical()
+        private void IntegrateVertical(float dt)
         {
             Transform.Position += (0, Velocity.Y);
             ComputeBounds();
@@ -161,7 +164,7 @@ namespace Superfluid.Engine
                 {
                     // Push out of blocks
                     var pen = Bounds.Bottom - range.Min;
-                    Transform.Position -= (0, pen + 1);
+                    Transform.Position -= (0, pen + 0.2F);
 
                     // Stop moving vertically
                     Velocity = (Velocity.X, 0);
@@ -178,7 +181,7 @@ namespace Superfluid.Engine
                 {
                     // Push out of blocks
                     var pen = Bounds.Top - range.Max;
-                    Transform.Position -= (0, pen - 1);
+                    Transform.Position -= (0, pen - 0.2F);
 
                     // Stop moving vertically
                     Velocity = (Velocity.X, 0);

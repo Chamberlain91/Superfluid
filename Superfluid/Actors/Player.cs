@@ -13,7 +13,8 @@ namespace Superfluid.Actors
         public Player(Sprite sprite)
             : base(sprite)
         {
-            // 
+            LocalBounds = Rectangle.Inflate(LocalBounds, -8);
+            LocalBounds = Rectangle.Offset(LocalBounds, (0, 8));
         }
 
         public override void Update(float dt)
