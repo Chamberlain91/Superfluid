@@ -323,6 +323,8 @@
     <None Remove="Assets\Images\Particles\particleYellow_5.png" />
     <None Remove="Assets\Images\Particles\particleYellow_6.png" />
     <None Remove="Assets\Images\Particles\particleYellow_7.png" />
+    <None Remove="Assets\Images\Pipes\Gold\pipeGold_01.png" />
+    <None Remove="Assets\Images\Pipes\Gold\pipeGold_02.png" />
     <None Remove="Assets\Images\Pipes\Green\pipeGreen_01.png" />
     <None Remove="Assets\Images\Pipes\Green\pipeGreen_02.png" />
     <None Remove="Assets\Images\Pipes\Green\pipeGreen_03.png" />
@@ -427,6 +429,28 @@
     <None Remove="Assets\Images\Pipes\Grey\pipeGrey_42.png" />
     <None Remove="Assets\Images\Pipes\Grey\pipeGrey_43.png" />
     <None Remove="Assets\Images\Pipes\Grey\pipeGrey_44.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_45.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_46.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_47.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_48.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_49.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_50.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_51.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_52.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_53.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_54.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_55.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_56.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_57.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_58.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_59.png" />
+    <None Remove="Assets\Images\Pipes\Grey\pipeGrey_60.png" />
+    <None Remove="Assets\Images\Pipes\Water\curvePipe_water_01.png" />
+    <None Remove="Assets\Images\Pipes\Water\curvePipe_water_02.png" />
+    <None Remove="Assets\Images\Pipes\Water\curvePipe_water_03.png" />
+    <None Remove="Assets\Images\Pipes\Water\curvePipe_water_04.png" />
+    <None Remove="Assets\Images\Pipes\Water\horozontalPipe_water.png" />
+    <None Remove="Assets\Images\Pipes\Water\verticalPipe_water.png" />
     <None Remove="Assets\Images\Players\Beige\alienBeige_climb1.png" />
     <None Remove="Assets\Images\Players\Beige\alienBeige_climb2.png" />
     <None Remove="Assets\Images\Players\Beige\alienBeige_duck.png" />
@@ -809,6 +833,8 @@
     <EmbeddedResource Include="Assets\Images\Particles\particleYellow_5.png" />
     <EmbeddedResource Include="Assets\Images\Particles\particleYellow_6.png" />
     <EmbeddedResource Include="Assets\Images\Particles\particleYellow_7.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Gold\pipeGold_01.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Gold\pipeGold_02.png" />
     <EmbeddedResource Include="Assets\Images\Pipes\Green\pipeGreen_01.png" />
     <EmbeddedResource Include="Assets\Images\Pipes\Green\pipeGreen_02.png" />
     <EmbeddedResource Include="Assets\Images\Pipes\Green\pipeGreen_03.png" />
@@ -913,6 +939,22 @@
     <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_42.png" />
     <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_43.png" />
     <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_44.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_45.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_46.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_47.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_48.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_49.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_50.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_51.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_52.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_53.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_54.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_55.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_56.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_57.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_58.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_59.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Grey\pipeGrey_60.png" />
     <EmbeddedResource Include="Assets\Images\Players\Beige\alienBeige_climb1.png" />
     <EmbeddedResource Include="Assets\Images\Players\Beige\alienBeige_climb2.png" />
     <EmbeddedResource Include="Assets\Images\Players\Beige\alienBeige_duck.png" />
@@ -990,6 +1032,15 @@
     <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_stand_crop.png" />
     <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_walk1_crop.png" />
     <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_walk2_crop.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Images\Pipes\Water\curvePipe_water_01.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Water\curvePipe_water_02.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Water\curvePipe_water_03.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Water\curvePipe_water_04.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Water\horozontalPipe_water.png" />
+    <EmbeddedResource Include="Assets\Images\Pipes\Water\verticalPipe_water.png" />
   </ItemGroup>
 
 </Project>
