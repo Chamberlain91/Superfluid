@@ -1,4 +1,6 @@
-﻿using Heirloom.Drawing;
+﻿using System.Diagnostics;
+
+using Heirloom.Drawing;
 using Heirloom.Math;
 
 namespace Superfluid.Engine
@@ -12,11 +14,7 @@ namespace Superfluid.Engine
 
         protected FaceDirection Facing;
 
-        protected enum FaceDirection
-        {
-            Left,
-            Right
-        }
+        private readonly StateMachine<State> _stateMachine = new StateMachine<State>();
 
         protected Actor(Sprite sprite)
         {
@@ -25,6 +23,15 @@ namespace Superfluid.Engine
 
             // 
             LocalBounds = Sprite.Frames[0].Image.Bounds;
+
+            // Create state machine
+            _stateMachine.Add(State.Idle, IdleEnter, IdleUpdate, null);
+            _stateMachine.Add(State.Walk, WalkEnter, WalkUpdate, null);
+            _stateMachine.Add(State.Jump, JumpEnter, JumpUpdate, null);
+            _stateMachine.Add(State.Hurt, HurtEnter, HurtUpdate, null);
+
+            // Goto default state
+            _stateMachine.Goto(State.Idle);
         }
 
         public Sprite Sprite { get; }
@@ -47,17 +54,38 @@ namespace Superfluid.Engine
             _time = 0;
         }
 
+        protected void GotoState(State state)
+        {
+            _stateMachine.Goto(state);
+        }
+
+        protected abstract void HurtUpdate(float dt);
+        protected virtual void HurtEnter() { SetAnimation("hurt"); }
+
+        protected abstract void JumpUpdate(float dt);
+        protected virtual void JumpEnter() { SetAnimation("jump"); }
+
+        protected abstract void WalkUpdate(float dt);
+        protected virtual void WalkEnter() { SetAnimation("walk"); }
+
+        protected abstract void IdleUpdate(float dt);
+        protected virtual void IdleEnter() { SetAnimation("idle"); }
+
         public override void Update(float dt)
         {
+            // Compute bounds
             _bounds = LocalBounds;
             _bounds.Offset(Transform.Position);
+
+            // 
+            AdvanceAnimation(dt);
+
+            // Update state machine
+            _stateMachine.Update(dt);
         }
 
         public override void Draw(Graphics gfx, float dt)
         {
-            // 
-            AdvanceAnimation(dt);
-
             // Compute flip matrix
             var flipMatrix = Matrix.Identity;
             if (Facing == FaceDirection.Left)
@@ -65,11 +93,21 @@ namespace Superfluid.Engine
                 flipMatrix = Matrix.CreateScale(-1, 1);
             }
 
-            // 
+            // Draw sprite
             gfx.DrawSprite(Sprite, _index, Transform * flipMatrix);
-            gfx.DrawText($"{_index}", Transform.Position, Font.Default, 32);
 
-            // 
+            // Draw debug information
+            DrawDebug(gfx);
+        }
+
+        [Conditional("DEBUG")]
+        private void DrawDebug(Graphics gfx)
+        {
+            // Draw State
+            gfx.Color = Color.Magenta;
+            gfx.DrawText($"State: {_stateMachine.State}", Transform.Position, Font.Default, 32);
+
+            // Draw Bounds
             gfx.Color = Color.Green;
             gfx.DrawRectOutline(Bounds);
         }
@@ -89,6 +127,20 @@ namespace Superfluid.Engine
                 // Wrap frame number
                 if (_index >= Animation.To) { _index = Animation.From; }
             }
+        }
+
+        protected enum FaceDirection
+        {
+            Left,
+            Right
+        }
+
+        protected enum State
+        {
+            Idle,
+            Walk,
+            Jump,
+            Hurt
         }
     }
 }

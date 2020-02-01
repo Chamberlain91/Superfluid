@@ -32,8 +32,6 @@ namespace Superfluid.Engine
             // 
             foreach (var xElement in xMap.Elements())
             {
-                Log.Debug(xElement.Name);
-
                 // 
                 switch ($"{xElement.Name}")
                 {
