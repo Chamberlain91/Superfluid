@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Heirloom.Collections;
+﻿using Heirloom.Collections;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
-using Heirloom.Math;
+
 using Superfluid.Engine;
 
 namespace Superfluid
@@ -31,12 +29,19 @@ namespace Superfluid
                 Window = new Window("Superfluid!");
                 Window.Maximize();
 
+                // Bind Input
+                Input.AttachToWindow(Window);
+
                 // Load game assets
                 Assets.LoadDatabase();
                 Assets.PackAtlas();
 
-                // Set the origin on images with the specified prefix to their centers
-                Assets.SetImagesCenterOrigin("alien");
+                // Center origins on assets prefixed by string given
+                Assets.SetImagesCenterOrigin("crosshair102");
+                Assets.SetImagesCenterOrigin("alien"); // alienpink_walk1, etc
+
+                // Sets the cursor
+                SetCursor("crosshair102", Color.Pink);
 
                 // 
                 Map = Assets.GetMap("testmap");
@@ -49,6 +54,26 @@ namespace Superfluid
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
                 Loop.Start();
             });
+        }
+
+        private static void SetCursor(string name, Color color)
+        {
+            // Clone image
+            var image = Assets.GetImage(name);
+            var cursor = new Image(image.Size);
+
+            // Copy pixels
+            for (var y = 0; y < cursor.Height; y++)
+            {
+                for (var x = 0; x < cursor.Width; x++)
+                {
+                    cursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * color);
+                }
+            }
+
+            // Center of image
+            cursor.Origin = image.Origin;
+            Window.SetCursor(cursor);
         }
 
         public static Sprite LoadPlayerSprite()
@@ -90,6 +115,12 @@ namespace Superfluid
             public override void Update(float dt)
             {
                 // Whee!
+            }
+
+            public override void Draw(Graphics gfx, float dt)
+            {
+                base.Draw(gfx, dt);
+                // Draw metadata
             }
         }
     }
