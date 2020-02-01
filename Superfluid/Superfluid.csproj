@@ -940,7 +940,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Actors\" />
     <Folder Include="Entities\" />
   </ItemGroup>
 

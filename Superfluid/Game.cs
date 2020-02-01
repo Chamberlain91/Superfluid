@@ -1,7 +1,9 @@
 ﻿using Heirloom.Collections;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
+using Heirloom.Drawing.Extras;
 
+using Superfluid.Actors;
 using Superfluid.Engine;
 
 namespace Superfluid
@@ -63,12 +65,9 @@ namespace Superfluid
             var cursor = new Image(image.Size);
 
             // Copy pixels
-            for (var y = 0; y < cursor.Height; y++)
+            foreach (var (x, y) in Rasterizer.Rectangle(cursor.Size))
             {
-                for (var x = 0; x < cursor.Width; x++)
-                {
-                    cursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * color);
-                }
+                cursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * color);
             }
 
             // Center of image
@@ -82,8 +81,8 @@ namespace Superfluid
             {
                 { "walk", 0.1F, Assets.GetImages("alienpink_walk1", "alienpink_walk2") },
                 { "jump", 0.1F, Assets.GetImages("alienpink_jump") },
-                { "stand", 2F, Assets.GetImages("alienpink_stand", "alienpink_front") },
-                { "hit", 2F, Assets.GetImages("alienpink_hit") }
+                { "idle", 5F, Assets.GetImages("alienpink_stand", "alienpink_front") },
+                { "hurt", 1.0F, Assets.GetImages("alienpink_hit") }
             };
 
             return builder.CreateSprite();
@@ -101,27 +100,13 @@ namespace Superfluid
                 layer.Draw(gfx);
             }
 
-            // 
+            // Update Actor
             Actor.Update(dt);
+            
+            // Draw Actor
+            gfx.PushState();
             Actor.Draw(gfx, dt);
-        }
-
-        private class Player : Actor
-        {
-            public Player(Sprite sprite)
-                : base(sprite)
-            { }
-
-            public override void Update(float dt)
-            {
-                // Whee!
-            }
-
-            public override void Draw(Graphics gfx, float dt)
-            {
-                base.Draw(gfx, dt);
-                // Draw metadata
-            }
+            gfx.PopState();
         }
     }
 }
