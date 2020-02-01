@@ -1,8 +1,7 @@
-﻿using System;
-using Heirloom.Collections;
+﻿using Heirloom.Collections;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
-
+using Heirloom.Math;
 using Superfluid.Engine;
 
 namespace Superfluid
@@ -14,6 +13,8 @@ namespace Superfluid
         public static RenderLoop Loop { get; private set; }
 
         public static TypeDictionary<Entity> Entities { get; private set; }
+
+        static public TileMap Map;
 
         private static void Main(string[] args)
         {
@@ -27,7 +28,11 @@ namespace Superfluid
                 Window.Maximize();
 
                 // Load game assets
-                Assets.LoadAssetDatabase();
+                Assets.LoadDatabase();
+                Assets.PackAtlas();
+
+                // 
+                Map = Assets.GetMap("testmap");
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
@@ -37,8 +42,34 @@ namespace Superfluid
 
         private static void OnUpdate(Graphics gfx, float dt)
         {
+            // 
             gfx.Clear(Color.DarkGray);
-            gfx.DrawImage(Assets.GetImage("blue_desert"), (0, 0));
+
+            // Draw each map layer
+            for (var i = 0; i < Map.LayerCount; i++)
+            {
+                DrawMapLayer(gfx, Map.GetLayer(i));
+            }
+        }
+
+        private static void DrawMapLayer(Graphics gfx, TileMapLayer layer)
+        {
+            for (var y = 0; y < Map.Height; y++)
+            {
+                for (var x = 0; x < Map.Height; x++)
+                {
+                    var tile = layer.GetTile(x, y);
+                    if (tile == null) { continue; }
+
+                    // Compute tile position
+                    var co = new IntVector(x, y);
+                    var pos = co * (IntVector) Map.TileSize;
+                    pos.Y += Map.TileSize.Height - tile.Image.Height;
+
+                    // Draw tile
+                    gfx.DrawImage(tile.Image, pos);
+                }
+            }
         }
     }
 }

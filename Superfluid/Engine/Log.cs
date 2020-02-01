@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Superfluid
+namespace Superfluid.Engine
 {
     public static class Log
     {
-        public static void Error(string message)
+        public static void Warn(object message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+
+        public static void Error(object message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(message);
@@ -13,7 +20,7 @@ namespace Superfluid
         }
 
         [Conditional("DEBUG")]
-        public static void Debug(string message)
+        public static void Debug(object message)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(message);
@@ -21,7 +28,7 @@ namespace Superfluid
         }
 
         [Conditional("DEBUG")]
-        public static void Info(string message)
+        public static void Info(object message)
         {
             Console.WriteLine(message);
         }

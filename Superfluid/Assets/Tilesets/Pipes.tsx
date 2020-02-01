@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.2" tiledversion="1.3.2" name="Pipes" tilewidth="236" tileheight="236" tilecount="88" columns="0">
- <grid orientation="orthogonal" width="3" height="3"/>
+ <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="160" height="160" source="../Images/Pipes/Green/pipeGreen_01.png"/>
  </tile>
