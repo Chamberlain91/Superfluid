@@ -1,4 +1,5 @@
-﻿using Heirloom.Drawing;
+﻿using System.Diagnostics;
+using Heirloom.Drawing;
 
 namespace Superfluid.Engine
 {
@@ -14,5 +15,8 @@ namespace Superfluid.Engine
         public abstract void Update(float dt);
 
         public abstract void Draw(Graphics gfx, float dt);
+
+        [Conditional("DEBUG")]
+        public virtual void DebugDraw(Graphics gfx) { }
     }
 }

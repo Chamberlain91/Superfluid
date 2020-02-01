@@ -949,10 +949,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_climb1_crop.png" />
     <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_climb2_crop.png" />
     <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_duck_crop.png" />
