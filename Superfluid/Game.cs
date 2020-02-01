@@ -209,7 +209,7 @@ namespace Superfluid
             gfx.PushState();
             {
                 // Draw background (skybox)
-                var backgroundRatio = Background.Height / (float) stageHeight;
+                var backgroundRatio = Background.Width / (float) stageWidth;
                 gfx.DrawImage(Background, Matrix.CreateScale(backgroundRatio));
 
                 // Draw background (frame)
