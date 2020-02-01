@@ -2,7 +2,7 @@
 using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Drawing.Extras;
-
+using Heirloom.Math;
 using Superfluid.Actors;
 using Superfluid.Engine;
 
@@ -19,6 +19,8 @@ namespace Superfluid
         public static TileMap Map;
 
         public static Actor Actor;
+
+        public static Image Background;
 
         private static void Main(string[] args)
         {
@@ -46,11 +48,14 @@ namespace Superfluid
                 SetCursor("crosshair102", Color.Pink);
 
                 // 
+                Background = Assets.GetImage("colored_desert");
+
+                // 
                 Map = Assets.GetMap("testmap");
 
                 // 
-                var spr = LoadPlayerSprite();
-                Actor = new Player(spr);
+                Actor = new Player(LoadPlayerSprite());
+                Actor.Transform.Position = (100, 300);
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
@@ -79,10 +84,10 @@ namespace Superfluid
         {
             var builder = new SpriteBuilder
             {
-                { "walk", 0.1F, Assets.GetImages("alienpink_walk1", "alienpink_walk2") },
-                { "jump", 0.1F, Assets.GetImages("alienpink_jump") },
-                { "idle", 5F, Assets.GetImages("alienpink_stand", "alienpink_front") },
-                { "hurt", 1.0F, Assets.GetImages("alienpink_hit") }
+                { "walk", 0.1F, Assets.GetImages("alienpink_walk1_crop", "alienpink_walk2_crop") },
+                { "jump", 0.1F, Assets.GetImages("alienpink_jump_crop") },
+                { "idle", 5F, Assets.GetImages("alienpink_stand_crop", "alienpink_front_crop") },
+                { "hurt", 1.0F, Assets.GetImages("alienpink_hit_crop") }
             };
 
             return builder.CreateSprite();
@@ -93,6 +98,10 @@ namespace Superfluid
             // Clear the screen
             gfx.Clear(Color.DarkGray);
 
+            // 
+            var backgroundratio = gfx.Surface.Height / (float) (Map.Height * Map.TileSize.Height);
+            gfx.DrawImage(Background, Matrix.CreateScale(backgroundratio));
+
             // Draw each map layer
             for (var i = 0; i < Map.LayerCount; i++)
             {
@@ -102,7 +111,7 @@ namespace Superfluid
 
             // Update Actor
             Actor.Update(dt);
-            
+
             // Draw Actor
             gfx.PushState();
             Actor.Draw(gfx, dt);
