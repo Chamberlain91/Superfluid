@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-
+﻿using System;
+using Heirloom.Collections;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
-using Heirloom.Sound.Effects;
-using Heirloom.Sound;
+
+using Superfluid.Engine;
 
 namespace Superfluid
 {
@@ -13,13 +13,21 @@ namespace Superfluid
 
         public static RenderLoop Loop { get; private set; }
 
+        public static TypeDictionary<Entity> Entities { get; private set; }
+
         private static void Main(string[] args)
         {
             Application.Run(() =>
             {
+                // Create entities storage
+                Entities = new TypeDictionary<Entity>();
+
                 // Create the game window
                 Window = new Window("Superfluid!");
                 Window.Maximize();
+
+                // Load game assets
+                Assets.LoadAssetDatabase();
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
@@ -30,6 +38,7 @@ namespace Superfluid
         private static void OnUpdate(Graphics gfx, float dt)
         {
             gfx.Clear(Color.DarkGray);
+            gfx.DrawImage(Assets.GetImage("blue_desert"), (0, 0));
         }
     }
 }
