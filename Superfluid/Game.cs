@@ -1,10 +1,13 @@
 ﻿using Heirloom.Collections;
+using Heirloom.Collections.Spatial;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Drawing.Extras;
+using Heirloom.Math;
 
 using Superfluid.Actors;
 using Superfluid.Engine;
+using Superfluid.Entities;
 
 namespace Superfluid
 {
@@ -18,7 +21,9 @@ namespace Superfluid
 
         public static TileMap Map;
 
-        public static Actor Actor;
+        public static Image Background;
+
+        public static BoundingTreeSpatialCollection<Block> Spatial { get; private set; }
 
         private static void Main(string[] args)
         {
@@ -27,8 +32,12 @@ namespace Superfluid
                 // Create entities storage
                 Entities = new TypeDictionary<Entity>();
 
+                // 
+                Spatial = new BoundingTreeSpatialCollection<Block>();
+
                 // Create the game window
                 Window = new Window("Superfluid!");
+                Window.Graphics.EnableFPSOverlay = true;
                 Window.Maximize();
 
                 // Bind Input
@@ -45,17 +54,49 @@ namespace Superfluid
                 // Sets the cursor
                 SetCursor("crosshair102", Color.Pink);
 
-                // 
-                Map = Assets.GetMap("testmap");
+                // Load the background image
+                Background = Assets.GetImage("colored_desert");
+
+                // Load the test map
+                LoadMap("testmap");
+
+                // Create the player actor
+                var player = new Player(LoadPlayerSprite());
+                player.Transform.Position = (100, 300);
 
                 // 
-                var spr = LoadPlayerSprite();
-                Actor = new Player(spr);
+                Entities.Add(player);
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
                 Loop.Start();
             });
+        }
+
+        private static void LoadMap(string name)
+        {
+            Spatial.Clear();
+
+            // Load map data (load phase)
+            Map = Assets.GetMap(name);
+
+            // Scan map data (generate phase)
+            var groundLayer = Map.GetLayer("ground");
+            foreach (var (x, y) in Rasterizer.Rectangle(Map.Size))
+            {
+                var tile = groundLayer.GetTile(x, y);
+                if (tile == null) { continue; }
+                else
+                {
+                    // Compute block position
+                    var pos = new Vector(x, y) * (Vector) Map.TileSize;
+                    var block = new Block((pos, Map.TileSize));
+
+                    // 
+                    Spatial.Add(block, block.Bounds);
+                    Entities.Add(block);
+                }
+            }
         }
 
         private static void SetCursor(string name, Color color)
@@ -79,10 +120,10 @@ namespace Superfluid
         {
             var builder = new SpriteBuilder
             {
-                { "walk", 0.1F, Assets.GetImages("alienpink_walk1", "alienpink_walk2") },
-                { "jump", 0.1F, Assets.GetImages("alienpink_jump") },
-                { "idle", 5F, Assets.GetImages("alienpink_stand", "alienpink_front") },
-                { "hurt", 1.0F, Assets.GetImages("alienpink_hit") }
+                { "walk", 0.1F, Assets.GetImages("alienpink_walk1_crop", "alienpink_walk2_crop") },
+                { "jump", 0.1F, Assets.GetImages("alienpink_jump_crop") },
+                { "idle", 5F, Assets.GetImages("alienpink_stand_crop", "alienpink_front_crop") },
+                { "hurt", 1.0F, Assets.GetImages("alienpink_hit_crop") }
             };
 
             return builder.CreateSprite();
@@ -93,6 +134,10 @@ namespace Superfluid
             // Clear the screen
             gfx.Clear(Color.DarkGray);
 
+            // Draw background (skybox)
+            var backgroundratio = gfx.Surface.Height / (float) (Map.Height * Map.TileSize.Height);
+            gfx.DrawImage(Background, Matrix.CreateScale(backgroundratio));
+
             // Draw each map layer
             for (var i = 0; i < Map.LayerCount; i++)
             {
@@ -100,13 +145,20 @@ namespace Superfluid
                 layer.Draw(gfx);
             }
 
-            // Update Actor
-            Actor.Update(dt);
-            
-            // Draw Actor
-            gfx.PushState();
-            Actor.Draw(gfx, dt);
-            gfx.PopState();
+            // Update entities
+            foreach (var entity in Entities)
+            {
+                entity.Update(dt);
+            }
+
+            // Draw entities
+            foreach (var entity in Entities)
+            {
+                gfx.PushState();
+                entity.Draw(gfx, dt);
+                entity.DebugDraw(gfx);
+                gfx.PopState();
+            }
         }
     }
 }

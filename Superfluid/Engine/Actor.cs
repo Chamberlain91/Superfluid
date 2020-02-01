@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-using Heirloom.Drawing;
+﻿using Heirloom.Drawing;
 using Heirloom.Math;
 
 namespace Superfluid.Engine
@@ -95,13 +93,9 @@ namespace Superfluid.Engine
 
             // Draw sprite
             gfx.DrawSprite(Sprite, _index, Transform * flipMatrix);
-
-            // Draw debug information
-            DrawDebug(gfx);
         }
 
-        [Conditional("DEBUG")]
-        private void DrawDebug(Graphics gfx)
+        public override void DebugDraw(Graphics gfx)
         {
             // Draw State
             gfx.Color = Color.Magenta;
@@ -110,6 +104,13 @@ namespace Superfluid.Engine
             // Draw Bounds
             gfx.Color = Color.Green;
             gfx.DrawRectOutline(Bounds);
+
+            // 
+            foreach (var block in Game.Spatial.Query(Bounds))
+            {
+                gfx.Color = Color.Orange;
+                gfx.DrawRectOutline(block.Bounds, 3);
+            }
         }
 
         private void AdvanceAnimation(float dt)

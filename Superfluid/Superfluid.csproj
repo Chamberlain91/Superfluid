@@ -445,16 +445,25 @@
     <None Remove="Assets\Images\Players\Green\alienGreen_walk1.png" />
     <None Remove="Assets\Images\Players\Green\alienGreen_walk2.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_climb1.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_climb1_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_climb2.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_climb2_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_duck.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_duck_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_front.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_front_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_hit.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_hit_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_jump.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_jump_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_stand.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_stand_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_swim1.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_swim2.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_walk1.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_walk1_crop.png" />
     <None Remove="Assets\Images\Players\Pink\alienPink_walk2.png" />
+    <None Remove="Assets\Images\Players\Pink\alienPink_walk2_crop.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_climb1.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_climb2.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_duck.png" />
@@ -940,7 +949,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_climb1_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_climb2_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_duck_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_front_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_hit_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_jump_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_stand_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_walk1_crop.png" />
+    <EmbeddedResource Include="Assets\Images\Players\Pink\alienPink_walk2_crop.png" />
   </ItemGroup>
 
 </Project>
