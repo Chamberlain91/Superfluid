@@ -213,9 +213,9 @@ namespace Superfluid
             var stageHeight = Map.Height * Map.TileSize.Height;
             var stageWidth = Map.Width * Map.TileSize.Width;
 
-            // "Camera"
-            var offset = ((Vector) gfx.Surface.Size - (stageWidth, stageHeight)) / 2F;
-            var cameraMatrix = Matrix.CreateTranslation((IntVector) offset);
+            // Compute and set the "Camera"
+            var cameraCenterOffset = ((Vector) gfx.Surface.Size - (stageWidth, stageHeight)) / 2F;
+            var cameraMatrix = Matrix.CreateTranslation((IntVector) cameraCenterOffset);
             ScreenToWorld = Matrix.Inverse(cameraMatrix);
             gfx.GlobalTransform = cameraMatrix;
 
@@ -223,14 +223,24 @@ namespace Superfluid
             DrawBackground(gfx);
 
             // Draws each map layer
-            for (var i = 0; i < Map.LayerCount; i++)
-            {
-                var layer = Map.GetLayer(i);
-                layer.Draw(gfx);
-            }
+            var foregroundLayer = Map.GetLayer("foreground");
+            var backgroundLayer = Map.GetLayer("background");
+            var groundLayer = Map.GetLayer("ground");
 
-            // Draws each entity
-            DrawEntities(gfx, dt);
+            // Draw background
+            backgroundLayer.Draw(gfx);
+
+            // Draw Entity Back (ie. Pipes...)
+            DrawEntities(gfx, dt, EntityLayer.Back);
+
+            // Draw ground
+            groundLayer.Draw(gfx);
+
+            // Draws Entity Front (ie, Player, Sparks...)
+            DrawEntities(gfx, dt, EntityLayer.Front);
+
+            // Draw foreground
+            foregroundLayer.Draw(gfx);
         }
 
         private static void DrawBackground(Graphics gfx)
@@ -254,10 +264,10 @@ namespace Superfluid
             gfx.PopState();
         }
 
-        private static void DrawEntities(Graphics gfx, float dt)
+        private static void DrawEntities(Graphics gfx, float dt, EntityLayer layer)
         {
             // Draw Entities
-            foreach (var entity in _entities)
+            foreach (var entity in _entities.Where(e => e.Layer == layer))
             {
                 gfx.PushState();
                 entity.Draw(gfx, dt);

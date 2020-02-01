@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using Heirloom.Drawing;
 
 namespace Superfluid.Engine
@@ -6,6 +7,8 @@ namespace Superfluid.Engine
     public abstract class Entity
     {
         public Transform Transform { get; }
+
+        public EntityLayer Layer { get; set; }
 
         protected Entity()
         {
