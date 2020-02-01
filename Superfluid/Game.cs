@@ -1,7 +1,7 @@
 ﻿using Heirloom.Collections;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
-using Heirloom.Math;
+
 using Superfluid.Engine;
 
 namespace Superfluid
@@ -42,33 +42,14 @@ namespace Superfluid
 
         private static void OnUpdate(Graphics gfx, float dt)
         {
-            // 
+            // Clear the screen
             gfx.Clear(Color.DarkGray);
 
             // Draw each map layer
             for (var i = 0; i < Map.LayerCount; i++)
             {
-                DrawMapLayer(gfx, Map.GetLayer(i));
-            }
-        }
-
-        private static void DrawMapLayer(Graphics gfx, TileMapLayer layer)
-        {
-            for (var y = 0; y < Map.Height; y++)
-            {
-                for (var x = 0; x < Map.Height; x++)
-                {
-                    var tile = layer.GetTile(x, y);
-                    if (tile == null) { continue; }
-
-                    // Compute tile position
-                    var co = new IntVector(x, y);
-                    var pos = co * (IntVector) Map.TileSize;
-                    pos.Y += Map.TileSize.Height - tile.Image.Height;
-
-                    // Draw tile
-                    gfx.DrawImage(tile.Image, pos);
-                }
+                var layer = Map.GetLayer(i);
+                layer.Draw(gfx);
             }
         }
     }
