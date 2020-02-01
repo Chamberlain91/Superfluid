@@ -265,4 +265,40 @@
  <tile id="87">
   <image width="236" height="177" source="../Images/Pipes/Grey/pipeGrey_44.png"/>
  </tile>
+ <tile id="88">
+  <image width="70" height="140" source="../Images/Pipes/Green/pipeGreen_49.png"/>
+ </tile>
+ <tile id="89">
+  <image width="139" height="70" source="../Images/Pipes/Green/pipeGreen_50.png"/>
+ </tile>
+ <tile id="90">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_57.png"/>
+ </tile>
+ <tile id="91">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_58.png"/>
+ </tile>
+ <tile id="92">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_59.png"/>
+ </tile>
+ <tile id="93">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_60.png"/>
+ </tile>
+ <tile id="94">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_51.png"/>
+ </tile>
+ <tile id="95">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_52.png"/>
+ </tile>
+ <tile id="96">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_53.png"/>
+ </tile>
+ <tile id="97">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_54.png"/>
+ </tile>
+ <tile id="98">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_55.png"/>
+ </tile>
+ <tile id="99">
+  <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_56.png"/>
+ </tile>
 </tileset>
