@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Heirloom.Desktop;
 using Heirloom.Drawing;
@@ -28,6 +29,8 @@ namespace Superfluid.Actors
 
         public bool KeyDown => Input.GetKeyDown(Key.S);
 
+        public bool KeyShoot => Input.GetKeyDown(Key.Q);
+
         protected override void IdleUpdate(float dt)
         {
             // 
@@ -41,6 +44,18 @@ namespace Superfluid.Actors
 
             // Stop horizontal motion
             Velocity = (0, Velocity.Y);
+
+            // Shooting input
+            DetectShoot();
+        }
+
+        private void DetectShoot()
+        {
+            if (KeyShoot)
+            {
+                var laser = new Laser();
+                Game.AddEntity(laser);
+            }
         }
 
         protected override void WalkUpdate(float dt)
@@ -51,12 +66,16 @@ namespace Superfluid.Actors
             {
                 GotoState(State.Idle);
             }
+
+            // Shooting input
+            DetectShoot();
         }
 
         protected override void JumpUpdate(float dt)
         {
             WantFallDown = false;
             DetectMovement();
+            DetectShoot();
         }
 
         protected override void HurtUpdate(float dt)

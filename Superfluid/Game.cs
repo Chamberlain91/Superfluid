@@ -21,8 +21,6 @@ namespace Superfluid
 
         public static RenderLoop Loop { get; private set; }
 
-        public static TypeDictionary<Entity> Entities { get; private set; }
-
         public static TileMap Map;
 
         public static Image Background;
@@ -30,6 +28,9 @@ namespace Superfluid
         public static BoundingTreeSpatialCollection<ISpatialObject> Spatial { get; private set; }
 
         public static Color BackgroundColor = Color.Parse("#95A5A6");
+
+        private static HashSet<Entity> _addSet, _remSet;
+        private static TypeDictionary<Entity> _entities;
 
         private static void Main(string[] args)
         {
@@ -39,7 +40,11 @@ namespace Superfluid
                 Spatial = new BoundingTreeSpatialCollection<ISpatialObject>();
 
                 // Create entities collection
-                Entities = new TypeDictionary<Entity>();
+                _entities = new TypeDictionary<Entity>();
+
+                // 
+                _remSet = new HashSet<Entity>();
+                _addSet = new HashSet<Entity>();
 
                 // Create the game window
                 Window = new Window("Superfluid!");
@@ -69,12 +74,24 @@ namespace Superfluid
                 // Create the player actor
                 var player = new Player(LoadPlayerSprite());
                 player.Transform.Position = (200, 300);
-                Entities.Add(player);
+                _entities.Add(player);
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
                 Loop.Start();
             });
+        }
+
+        public static void AddEntity(Entity entity)
+        {
+            _remSet.Remove(entity);
+            _addSet.Add(entity);
+        }
+
+        public static void RemoveEntity(Entity entity)
+        {
+            _addSet.Remove(entity);
+            _remSet.Add(entity);
         }
 
         private static void LoadMap(string name)
@@ -123,7 +140,7 @@ namespace Superfluid
 
                     // 
                     Spatial.Add(block, block.Bounds);
-                    Entities.Add(block);
+                    _entities.Add(block);
                 }
             }
         }
@@ -158,18 +175,28 @@ namespace Superfluid
             return builder.CreateSprite();
         }
 
-        public static IEnumerable<T> QuerySpatial<T>(Rectangle rectangle)
+        public static IEnumerable<T> QuerySpatial<T>(IShape shape)
             where T : ISpatialObject
         {
-            return Spatial.Query(rectangle)
+            return Spatial.Query(shape)
                           .Where(obj => obj is T)
                           .Cast<T>();
         }
 
+        public static IEnumerable<T> FindEntities<T>() where T : Entity
+        {
+            return _entities.GetItemsByType<T>();
+        }
+
         private static void OnUpdate(Graphics gfx, float dt)
         {
+            // Add/Remove entities
+            foreach (var e in _remSet) { _entities.Remove(e); }
+            foreach (var e in _addSet) { _entities.Add(e); }
+            _remSet.Clear(); _addSet.Clear();
+
             // Update Entities
-            foreach (var entity in Entities)
+            foreach (var entity in _entities)
             {
                 entity.Update(dt);
             }
@@ -225,7 +252,7 @@ namespace Superfluid
         private static void DrawEntities(Graphics gfx, float dt)
         {
             // Draw Entities
-            foreach (var entity in Entities)
+            foreach (var entity in _entities)
             {
                 gfx.PushState();
                 entity.Draw(gfx, dt);
@@ -240,7 +267,7 @@ namespace Superfluid
         private static void DebugDrawEntities(Graphics gfx)
         {
             // Debug Drawing for Entities
-            foreach (var entity in Entities)
+            foreach (var entity in _entities)
             {
                 gfx.PushState();
                 entity.DebugDraw(gfx);
