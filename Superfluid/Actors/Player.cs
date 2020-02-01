@@ -16,6 +16,17 @@ namespace Superfluid.Actors
             // 
         }
 
+        public override void Update(float dt)
+        {
+            base.Update(dt);
+
+
+            if (Input.GetKeyDown(Key.P))
+            {
+                Transform.Position = (300, 300);
+            }
+        }
+
         protected override void IdleUpdate(float dt)
         {
             var keyLeft = Input.GetKeyDown(Key.A);
@@ -38,12 +49,12 @@ namespace Superfluid.Actors
             {
                 if (keyLeft)
                 {
-                    Transform.Position += Vector.Left * WalkSpeed;
+                    Velocity = (-WalkSpeed, Velocity.Y);
                     Facing = FaceDirection.Left;
                 }
                 else
                 {
-                    Transform.Position += Vector.Right * WalkSpeed;
+                    Velocity = (WalkSpeed, Velocity.Y);
                     Facing = FaceDirection.Right;
                 }
             }

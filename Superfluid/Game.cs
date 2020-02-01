@@ -62,7 +62,7 @@ namespace Superfluid
 
                 // Create the player actor
                 var player = new Player(LoadPlayerSprite());
-                player.Transform.Position = (100, 300);
+                player.Transform.Position = (200, 300);
 
                 // 
                 Entities.Add(player);

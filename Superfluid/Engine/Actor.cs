@@ -1,5 +1,9 @@
-﻿using Heirloom.Drawing;
+﻿using System;
+
+using Heirloom.Drawing;
 using Heirloom.Math;
+
+using Range = Heirloom.Math.Range;
 
 namespace Superfluid.Engine
 {
@@ -10,9 +14,9 @@ namespace Superfluid.Engine
 
         private Rectangle _bounds;
 
-        protected FaceDirection Facing;
-
         private readonly StateMachine<State> _stateMachine = new StateMachine<State>();
+
+        protected FaceDirection Facing;
 
         protected Actor(Sprite sprite)
         {
@@ -41,6 +45,8 @@ namespace Superfluid.Engine
         public Rectangle LocalBounds { get; protected set; }
 
         public Rectangle Bounds => _bounds;
+
+        public Vector Velocity { get; set; }
 
         public void SetAnimation(string name)
         {
@@ -71,15 +77,122 @@ namespace Superfluid.Engine
 
         public override void Update(float dt)
         {
-            // Compute bounds
-            _bounds = LocalBounds;
-            _bounds.Offset(Transform.Position);
+            // Gravity
+            Velocity += Vector.Down * 0.33F;
+
+            // 
+            IntegrateHorizontal();
+            IntegrateVertical();
 
             // 
             AdvanceAnimation(dt);
 
             // Update state machine
             _stateMachine.Update(dt);
+        }
+
+        private void IntegrateHorizontal()
+        {
+            Transform.Position += (Velocity.X, 0);
+            ComputeBounds();
+
+            // Find thresholds
+            var range = Range.Indeterminate;
+            foreach (var block in Game.Spatial.Query(Bounds))
+            {
+                range.Max = Calc.Max(block.Bounds.Right, range.Max);
+                range.Min = Calc.Min(block.Bounds.Left, range.Min);
+            }
+
+            if (Velocity.X > 0)
+            // Moving right
+            {
+                // If found a penetration
+                if (range.Min < float.MaxValue)
+                {
+                    // Push out of blocks
+                    var pen = Bounds.Right - range.Min;
+                    Transform.Position -= (pen + 1, 0);
+
+                    // Stop moving horizontally
+                    Velocity = (0, Velocity.Y);
+
+                    // Update bounds
+                    ComputeBounds();
+                }
+            }
+            else
+            // Moving left
+            {
+                // If found a penetration
+                if (range.Max > float.MinValue)
+                {
+                    // Push out of blocks
+                    var pen = Bounds.Left - range.Max;
+                    Transform.Position -= (pen - 1, 0);
+
+                    // Stop moving horizontally
+                    Velocity = (0, Velocity.Y);
+
+                    // Update bounds
+                    ComputeBounds();
+                }
+            }
+        }
+
+        private void IntegrateVertical()
+        {
+            Transform.Position += (0, Velocity.Y);
+            ComputeBounds();
+
+            // Find minimal threshold
+            var range = Range.Indeterminate;
+            foreach (var block in Game.Spatial.Query(Bounds))
+            {
+                range.Max = Calc.Max(block.Bounds.Bottom, range.Max);
+                range.Min = Calc.Min(block.Bounds.Top, range.Min);
+            }
+
+            if (Velocity.Y > 0)
+            // Moving down
+            {
+                // If found a penetration
+                if (range.Min < float.MaxValue)
+                {
+                    // Push out of blocks
+                    var pen = Bounds.Bottom - range.Min;
+                    Transform.Position -= (0, pen + 1);
+
+                    // Stop moving vertically
+                    Velocity = (Velocity.X, 0);
+
+                    // Update bounds
+                    ComputeBounds();
+                }
+            }
+            else
+            // Moving up
+            {
+                // If found a penetration
+                if (range.Max > float.MinValue)
+                {
+                    // Push out of blocks
+                    var pen = Bounds.Top - range.Max;
+                    Transform.Position -= (0, pen - 1);
+
+                    // Stop moving vertically
+                    Velocity = (Velocity.X, 0);
+
+                    // Update bounds
+                    ComputeBounds();
+                }
+            }
+        }
+
+        private void ComputeBounds()
+        {
+            _bounds = LocalBounds;
+            _bounds.Offset(Transform.Position);
         }
 
         public override void Draw(Graphics gfx, float dt)
