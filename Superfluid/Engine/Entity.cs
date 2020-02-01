@@ -11,6 +11,8 @@ namespace Superfluid.Engine
             Transform = new Transform();
         }
 
-        public abstract void Update(Graphics gfx, float dt);
+        public abstract void Update(float dt);
+
+        public abstract void Draw(Graphics gfx, float dt);
     }
 }

@@ -7,30 +7,18 @@ namespace Superfluid.Engine
     public sealed class Transform
     {
         // Components in local space
-        private Vector _localPosition, _localScale = Vector.One;
-        private Vector _localDirection;
-        private float _localRotation;
-
-        // Components in world space
-        private Vector _worldPosition; // no world scale
-        private Vector _worldDirection;
-        private float _worldRotation;
+        private Vector _position, _scale = Vector.One;
+        private Vector _direction;
+        private float _rotation;
 
         // Matrices
         private Matrix _localToWorld; // local -> world
         private Matrix _worldToLocal; // world -> local
 
-        // Parent hierarchy
-        private readonly List<Transform> _children = new List<Transform>();
-        private Transform _parent;
-
         // Dirty flags
         private bool _dirtyWorldToLocal = true;
         private bool _dirtyLocalToWorld = true;
-        private bool _dirtyWorldPosition = true;
-        private bool _dirtyWorldRotation = true;
-        private bool _dirtyLocalDirection = true;
-        private bool _dirtyWorldDirection = true;
+        private bool _dirtyDirection = true;
 
         #region Constructor
 
@@ -67,29 +55,14 @@ namespace Superfluid.Engine
         /// </summary>
         public Transform(Vector position, float rotation, Vector scale)
         {
-            _localPosition = position;
-            _localRotation = rotation;
-            _localScale = scale;
+            Position = position;
+            Rotation = rotation;
+            Scale = scale;
         }
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Associated children transform objects.
-        /// </summary>
-        public IReadOnlyList<Transform> Children => _children;
-
-        /// <summary>
-        /// Does this transform have an assigned parent?
-        /// </summary>
-        public bool HasParent => _parent != null;
-
-        /// <summary>
-        /// Gets the parent of this transform.
-        /// </summary>
-        public Transform Parent => _parent;
 
         /// <summary>
         /// Gets the local to world matrix.
@@ -101,10 +74,7 @@ namespace Superfluid.Engine
                 if (_dirtyLocalToWorld)
                 {
                     // Compute local transform
-                    _localToWorld = Matrix.CreateTransform(LocalPosition, LocalRotation, LocalScale);
-
-                    // If we have a parent, combine with parent transform
-                    if (HasParent) { _localToWorld *= _parent.Matrix; }
+                    _localToWorld = Matrix.CreateTransform(Position, Rotation, Scale);
 
                     // We are no longer dirty (local to world)
                     _dirtyLocalToWorld = false;
@@ -127,9 +97,6 @@ namespace Superfluid.Engine
                     // Note: Using the property form here is important for order of operations
                     _worldToLocal = Matrix.Inverse(Matrix);
 
-                    // ...? Move back into space relative to parent...?
-                    if (HasParent) { _worldToLocal *= _parent.Matrix; }
-
                     // We are no longer dirty (world to local)
                     _dirtyWorldToLocal = false;
                 }
@@ -139,88 +106,15 @@ namespace Superfluid.Engine
         }
 
         /// <summary>
-        /// Gets or sets the position in world space.
-        /// </summary>
-        public Vector WorldPosition
-        {
-            get
-            {
-                if (_dirtyWorldPosition)
-                {
-                    // Compute world position
-                    if (HasParent) { _worldPosition = Matrix * _localPosition; }
-                    else { _worldPosition = _localPosition; }
-
-                    // 
-                    _dirtyWorldPosition = false;
-                }
-
-                return _worldPosition;
-            }
-
-            set
-            {
-                if (HasParent) { LocalPosition = InverseMatrix * value; }
-                else { LocalPosition = value; }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the rotation in world space.
-        /// </summary>
-        public float WorldRotation
-        {
-            get
-            {
-                if (_dirtyWorldRotation)
-                {
-                    // Compute world rotation
-                    if (HasParent) { _worldRotation = _parent.WorldRotation + _localRotation; }
-                    else { _worldRotation = _localRotation; }
-
-                    // 
-                    _dirtyWorldRotation = false;
-                }
-
-                return _worldRotation;
-            }
-
-            set
-            {
-                if (HasParent) { LocalRotation = _parent.WorldRotation + value; }
-                else { LocalRotation = value; }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the direction vector in world space.
-        /// </summary>
-        public Vector WorldDirection
-        {
-            get
-            {
-                if (_dirtyWorldDirection)
-                {
-                    _worldDirection = Vector.FromAngle(WorldRotation);
-                    _dirtyWorldDirection = false;
-                }
-
-                return _worldDirection;
-            }
-
-            set => WorldRotation = value.Angle;
-        }
-
-        /// <summary>
         /// Gets or sets the position in local space.
         /// </summary>
-        public Vector LocalPosition
+        public Vector Position
         {
-            get => _localPosition;
+            get => _position;
 
             set
             {
-                _localPosition = value;
+                _position = value;
                 MarkDirty();
             }
         }
@@ -228,13 +122,13 @@ namespace Superfluid.Engine
         /// <summary>
         /// Gets or sets the rotation in local space.
         /// </summary>
-        public float LocalRotation
+        public float Rotation
         {
-            get => _localRotation;
+            get => _rotation;
 
             set
             {
-                _localRotation = value;
+                _rotation = value;
                 MarkDirty();
             }
         }
@@ -242,78 +136,43 @@ namespace Superfluid.Engine
         /// <summary>
         /// Gets or sets the direction vector in local space.
         /// </summary>
-        public Vector LocalDirection
+        public Vector Direction
         {
             get
             {
-                if (_dirtyLocalDirection)
+                if (_dirtyDirection)
                 {
-                    _localDirection = Vector.FromAngle(LocalRotation);
-                    _dirtyLocalDirection = false;
+                    _direction = Vector.FromAngle(Rotation);
+                    _dirtyDirection = false;
                 }
 
-                return _localDirection;
+                return _direction;
             }
 
-            set
-            {
-                LocalRotation = value.Angle;
-            }
+            set => Rotation = value.Angle;
         }
 
         /// <summary>
         /// Gets or sets the scale in local space.
         /// </summary>
-        public Vector LocalScale
+        public Vector Scale
         {
-            get => _localScale;
+            get => _scale;
 
             set
             {
-                _localScale = value;
+                _scale = value;
                 MarkDirty();
             }
         }
 
         #endregion
 
-        /// <summary>
-        /// Assign (or remove) the parent object.
-        /// </summary>
-        public void SetParent(Transform parent)
-        {
-            // Different parent than before
-            if (_parent != null && parent != _parent)
-            {
-                // Remove this transform from the parent children
-                _parent._children.Remove(this);
-            }
-
-            // Record the new parent
-            _parent = parent;
-
-            // If a valid parent, add this transform to parent children
-            _parent?._children.Add(this);
-
-            // We need to recompute because we have a new basis
-            MarkDirty();
-        }
-
         private void MarkDirty()
         {
-            // Mark this transform as dirty
-            _dirtyLocalDirection = true;
-            _dirtyWorldDirection = true;
-            _dirtyWorldPosition = true;
-            _dirtyWorldRotation = true;
             _dirtyLocalToWorld = true;
             _dirtyWorldToLocal = true;
-
-            // Mark all children as dirty (recursively)
-            foreach (var child in _children)
-            {
-                child.MarkDirty();
-            }
+            _dirtyDirection = true;
         }
 
         #region Conversion Operators

@@ -5,6 +5,7 @@ using System.Linq;
 
 using Heirloom.Drawing;
 using Heirloom.IO;
+using Heirloom.Math;
 
 namespace Superfluid.Engine
 {
@@ -14,11 +15,17 @@ namespace Superfluid.Engine
 
         private static readonly Dictionary<string, Image> _images = new Dictionary<string, Image>();
 
-        private static readonly Dictionary<string, TileMap> _maps = new Dictionary<string, TileMap>();
+        private static readonly Dictionary<string, TileMap> _tileMaps = new Dictionary<string, TileMap>();
 
-        private static readonly Dictionary<string, TileSet> _sets = new Dictionary<string, TileSet>();
+        private static readonly Dictionary<string, TileSet> _tileSets = new Dictionary<string, TileSet>();
 
         private static readonly HashSet<string> _loaded = new HashSet<string>();
+
+        public static IEnumerable<string> ImageNames => _images.Keys;
+
+        public static IEnumerable<string> TileMapNames => _tileMaps.Keys;
+
+        public static IEnumerable<string> TileSetNames => _tileSets.Keys;
 
         public static void LoadDatabase()
         {
@@ -42,6 +49,17 @@ namespace Superfluid.Engine
         {
             // Compile images into atlas
             Image.CreateAtlas(_images.Values);
+        }
+
+        public static void SetImagesCenterOrigin(string prefix)
+        {
+            var names = ImageNames.Where(name => name.StartsWith(prefix));
+
+            foreach (var name in names)
+            {
+                var image = GetImage(name);
+                image.Origin = 0.5F * (Vector) image.Size;
+            }
         }
 
         public static bool LoadAsset(string identifier)
@@ -71,12 +89,12 @@ namespace Superfluid.Engine
 
                     case ".tmx":
                         // Load Tiled .tmx
-                        _maps[name] = new TileMap(stream);
+                        _tileMaps[name] = new TileMap(stream);
                         break;
 
                     case ".tsx":
                         // Load Tiled .tsx
-                        _sets[name] = new TileSet(stream);
+                        _tileSets[name] = new TileSet(stream);
                         break;
 
                     default:
@@ -106,6 +124,21 @@ namespace Superfluid.Engine
         #region Get Assets
 
         /// <summary>
+        /// Get multiple images by name.
+        /// </summary>
+        public static IEnumerable<Image> GetImages(params string[] names)
+        {
+            if (names is null) { throw new ArgumentNullException(nameof(names)); }
+            if (names.Length == 0) { throw new ArgumentException("Must specify at least one name", nameof(names)); }
+
+            // Emit each image by name
+            foreach (var name in names)
+            {
+                yield return GetImage(name);
+            }
+        }
+
+        /// <summary>
         /// Get an image by name.
         /// </summary>
         public static Image GetImage(string name)
@@ -130,7 +163,7 @@ namespace Superfluid.Engine
             ForbidBlank(name, nameof(name));
 
             // Try to get map
-            if (_maps.TryGetValue(name, out var map))
+            if (_tileMaps.TryGetValue(name, out var map))
             {
                 return map;
             }
@@ -147,7 +180,7 @@ namespace Superfluid.Engine
             ForbidBlank(name, nameof(name));
 
             // Try to get tile set
-            if (_sets.TryGetValue(name, out var set))
+            if (_tileSets.TryGetValue(name, out var set))
             {
                 return set;
             }

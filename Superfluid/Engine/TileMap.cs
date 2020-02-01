@@ -80,7 +80,7 @@ namespace Superfluid.Engine
                         }
 
                         // Append layer
-                        _layers.Add(new TileMapLayer(name, mapWidth, mapHeight, tiles));
+                        _layers.Add(new TileMapLayer(this, name, mapWidth, mapHeight, tiles));
                     }
                     break;
                 }
