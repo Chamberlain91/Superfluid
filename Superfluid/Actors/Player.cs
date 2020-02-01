@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+
 using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Math;
@@ -25,8 +26,11 @@ namespace Superfluid.Actors
 
         public bool KeyJump => Input.GetKeyDown(Key.Space);
 
+        public bool KeyDown => Input.GetKeyDown(Key.S);
+
         protected override void IdleUpdate(float dt)
         {
+            // 
             DetectJump();
 
             // Movement keys differ (ie, one is pressed)
@@ -34,6 +38,9 @@ namespace Superfluid.Actors
             {
                 GotoState(State.Walk);
             }
+
+            // Stop horizontal motion
+            Velocity = (0, Velocity.Y);
         }
 
         protected override void WalkUpdate(float dt)
@@ -48,6 +55,7 @@ namespace Superfluid.Actors
 
         protected override void JumpUpdate(float dt)
         {
+            WantFallDown = false;
             DetectMovement();
         }
 
@@ -76,22 +84,37 @@ namespace Superfluid.Actors
             }
             else
             {
+                // Stop horizontal motion
+                Velocity = (0, Velocity.Y);
+
                 return false;
             }
         }
 
         private void DetectJump()
         {
+            // 
+            WantFallDown = false;
+
+            // 
             if (KeyJump)
             {
                 Velocity = (Velocity.X, -10);
                 GotoState(State.Jump);
             }
 
+            // 
+            if (KeyDown)
+            {
+                // GotoState(State.Jump);
+                WantFallDown = true;
+            }
+
             // Fall detection
             if (!Game.QuerySpatial<Block>(Rectangle.Inflate(Bounds, 0.5F)).Any())
             {
                 GotoState(State.Jump);
+                WantFallDown = false;
             }
         }
 

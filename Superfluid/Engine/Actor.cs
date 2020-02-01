@@ -19,6 +19,8 @@ namespace Superfluid.Engine
 
         protected FaceDirection Facing;
 
+        protected bool WantFallDown = false;
+
         protected Actor(Sprite sprite)
         {
             Sprite = sprite;
@@ -83,12 +85,19 @@ namespace Superfluid.Engine
             // Gravity
             Velocity += Vector.Down * 0.33F;
 
-            // 
-            IntegrateVertical(dt);
-            IntegrateHorizontal(dt);
+            // Integrate vertical velocity
+            Transform.Position += (0, Velocity.Y);
+            ComputeBounds();
 
-            // 
-            Velocity = (Velocity.X * 0.33F, Velocity.Y);
+            // Resolve vertical collisions
+            var checkHorizontal = CollideVertical(dt);
+
+            // Integrate horizontal velocity
+            Transform.Position += (Velocity.X, 0);
+            ComputeBounds();
+
+            // Resolve horiztonal collisions
+            if (checkHorizontal) { IntegrateHorizontal(dt); }
 
             // 
             AdvanceAnimation(dt);
@@ -99,10 +108,6 @@ namespace Superfluid.Engine
 
         private void IntegrateHorizontal(float dt)
         {
-            // Integrate horizontal
-            Transform.Position += (Velocity.X, 0);
-            ComputeBounds();
-
             // Finds horizontal collision edges
             var range = Range.Indeterminate;
             foreach (var block in Game.QuerySpatial<Block>(Bounds))
@@ -140,47 +145,75 @@ namespace Superfluid.Engine
             }
         }
 
-        private void IntegrateVertical(float dt)
+        private bool CollideVertical(float dt)
         {
-            // Integrate vertically
-            Transform.Position += (0, Velocity.Y);
-            ComputeBounds();
-
             // Finds vertical collision edges
-            var range = Range.Indeterminate;
-            foreach (var block in Game.QuerySpatial<Block>(Bounds))
+            var yRange = Range.Indeterminate;
+            var maxBlock = default(Block);
+
+            // Detect possibly colliders
+            var colliders = Game.QuerySpatial<Block>(Bounds);
+
+            if (colliders.Any())
             {
-                range.Max = Calc.Max(block.Bounds.Bottom, range.Max);
-                range.Min = Calc.Min(block.Bounds.Top, range.Min);
+                // 
+                foreach (var block in colliders)
+                {
+                    yRange.Min = Calc.Min(block.Bounds.Top, yRange.Min);
+
+                    // 
+                    if (block.Bounds.Bottom > yRange.Max)
+                    {
+                        yRange.Max = block.Bounds.Bottom;
+                        maxBlock = block;
+                    }
+                }
+
+                var penetration = 0F;
+                if (Bounds.Top < yRange.Min && Bounds.Bottom < yRange.Max)
+                {
+                    // One way pass through
+                    if ((maxBlock?.IsOneWay ?? false))
+                    {
+                        if (Velocity.Y < 0) { return false; }
+                        if (WantFallDown) { return false; }
+                    }
+
+                    // Down Collision
+                    penetration = Bounds.Bottom - yRange.Min + 0.2F;
+                }
+                else if (Bounds.Top > yRange.Min && Bounds.Bottom > yRange.Max)
+                {
+                    // One way pass through
+                    if (maxBlock?.IsOneWay ?? false) { return false; }
+
+                    // Up Collision
+                    penetration = Bounds.Top - yRange.Max - 0.2F;
+                }
+
+                // If penetrating a vertical surface, push out and trigger events
+                if (Calc.Abs(penetration) > 0)
+                {
+                    // Push out of surface
+                    Transform.Position -= (0, penetration);
+
+                    // Update bounds
+                    ComputeBounds();
+
+                    // Trigger Collision Flag
+                    OnVerticalCollision(Calc.Sign(penetration));
+
+                    // Stop moving vertically
+                    Velocity = (Velocity.X, 0);
+                }
+                else
+                {
+                    // ...
+                    return false;
+                }
             }
 
-            var penetration = 0F;
-            if (range.Min < float.MaxValue && Velocity.Y > 0)
-            {
-                // Down Collision
-                penetration = Bounds.Bottom - range.Min + 0.2F;
-            }
-            else if (range.Max > float.MinValue && Velocity.Y < 0)
-            {
-                // Up Collision
-                penetration = Bounds.Top - range.Max - 0.2F;
-            }
-
-            // If penetrating a vertical surface, push out and trigger events
-            if (Calc.Abs(penetration) > 0)
-            {
-                // Push out of surface
-                Transform.Position -= (0, penetration);
-
-                // Update bounds
-                ComputeBounds();
-
-                // Trigger Collision Flag
-                OnVerticalCollision(Calc.Sign(penetration));
-
-                // Stop moving vertically
-                Velocity = (Velocity.X, 0);
-            }
+            return true;
         }
 
         internal abstract void OnHorizontalCollision(int dir);
@@ -210,7 +243,7 @@ namespace Superfluid.Engine
         {
             // Draw State
             gfx.Color = Color.Magenta;
-            gfx.DrawText($"State: {_stateMachine.State}", Transform.Position, Font.Default, 32);
+            gfx.DrawText($"State: {_stateMachine.State}\n{WantFallDown}", Transform.Position, Font.Default, 32);
 
             // Draw Bounds
             gfx.Color = Color.Green;
