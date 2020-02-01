@@ -301,4 +301,28 @@
  <tile id="99">
   <image width="140" height="140" source="../Images/Pipes/Green/pipeGreen_56.png"/>
  </tile>
+ <tile id="100">
+  <image width="70" height="140" source="../Images/Pipes/Grey/pipeGrey_53.png"/>
+ </tile>
+ <tile id="101">
+  <image width="140" height="70" source="../Images/Pipes/Grey/pipeGrey_55.png"/>
+ </tile>
+ <tile id="102">
+  <image width="140" height="140" source="../Images/Pipes/Grey/pipeGrey_57.png"/>
+ </tile>
+ <tile id="103">
+  <image width="140" height="140" source="../Images/Pipes/Grey/pipeGrey_58.png"/>
+ </tile>
+ <tile id="104">
+  <image width="140" height="140" source="../Images/Pipes/Grey/pipeGrey_59.png"/>
+ </tile>
+ <tile id="105">
+  <image width="140" height="140" source="../Images/Pipes/Grey/pipeGrey_60.png"/>
+ </tile>
+ <tile id="106">
+  <image width="70" height="140" source="../Images/Pipes/Gold/pipeGold_01.png"/>
+ </tile>
+ <tile id="107">
+  <image width="140" height="70" source="../Images/Pipes/Gold/pipeGold_02.png"/>
+ </tile>
 </tileset>
