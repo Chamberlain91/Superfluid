@@ -3,6 +3,7 @@ using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Drawing.Extras;
 using Heirloom.Math;
+
 using Superfluid.Actors;
 using Superfluid.Engine;
 
@@ -17,8 +18,6 @@ namespace Superfluid
         public static TypeDictionary<Entity> Entities { get; private set; }
 
         public static TileMap Map;
-
-        public static Actor Actor;
 
         public static Image Background;
 
@@ -47,15 +46,18 @@ namespace Superfluid
                 // Sets the cursor
                 SetCursor("crosshair102", Color.Pink);
 
-                // 
+                // Load the background image
                 Background = Assets.GetImage("colored_desert");
 
-                // 
+                // Load the test map
                 Map = Assets.GetMap("testmap");
 
+                // Create the player actor
+                var player = new Player(LoadPlayerSprite());
+                player.Transform.Position = (100, 300);
+
                 // 
-                Actor = new Player(LoadPlayerSprite());
-                Actor.Transform.Position = (100, 300);
+                Entities.Add(player);
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
@@ -98,7 +100,7 @@ namespace Superfluid
             // Clear the screen
             gfx.Clear(Color.DarkGray);
 
-            // 
+            // Draw background (skybox)
             var backgroundratio = gfx.Surface.Height / (float) (Map.Height * Map.TileSize.Height);
             gfx.DrawImage(Background, Matrix.CreateScale(backgroundratio));
 
@@ -109,13 +111,19 @@ namespace Superfluid
                 layer.Draw(gfx);
             }
 
-            // Update Actor
-            Actor.Update(dt);
+            // Update entities
+            foreach (var entity in Entities)
+            {
+                entity.Update(dt);
+            }
 
-            // Draw Actor
-            gfx.PushState();
-            Actor.Draw(gfx, dt);
-            gfx.PopState();
+            // Draw entities
+            foreach (var entity in Entities)
+            {
+                gfx.PushState();
+                entity.Draw(gfx, dt);
+                gfx.PopState();
+            }
         }
     }
 }
