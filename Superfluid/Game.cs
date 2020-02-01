@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
 using Heirloom.Collections;
 using Heirloom.Collections.Spatial;
 using Heirloom.Desktop;
@@ -24,17 +27,19 @@ namespace Superfluid
 
         public static Image Background;
 
-        public static BoundingTreeSpatialCollection<Block> Spatial { get; private set; }
+        public static BoundingTreeSpatialCollection<ISpatialObject> Spatial { get; private set; }
+
+        public static Color BackgroundColor = Color.Parse("#95A5A6");
 
         private static void Main(string[] args)
         {
             Application.Run(() =>
             {
-                // Create entities storage
-                Entities = new TypeDictionary<Entity>();
+                // Create spatial collection
+                Spatial = new BoundingTreeSpatialCollection<ISpatialObject>();
 
-                // 
-                Spatial = new BoundingTreeSpatialCollection<Block>();
+                // Create entities collection
+                Entities = new TypeDictionary<Entity>();
 
                 // Create the game window
                 Window = new Window("Superfluid!");
@@ -64,8 +69,6 @@ namespace Superfluid
                 // Create the player actor
                 var player = new Player(LoadPlayerSprite());
                 player.Transform.Position = (200, 300);
-
-                // 
                 Entities.Add(player);
 
                 // Create main loop
@@ -81,6 +84,8 @@ namespace Superfluid
             // Load map data (load phase)
             Map = Assets.GetMap(name);
 
+            var tileset = Assets.GetTileSet("industrial");
+
             // Scan map data (generate phase)
             var groundLayer = Map.GetLayer("ground");
             foreach (var (x, y) in Rasterizer.Rectangle(Map.Size))
@@ -91,7 +96,30 @@ namespace Superfluid
                 {
                     // Compute block position
                     var pos = new Vector(x, y) * (Vector) Map.TileSize;
-                    var block = new Block((pos, Map.TileSize));
+                    var rec = new Rectangle(pos, Map.TileSize);
+
+                    var soft = false;
+
+                    if (tile.TileSet == tileset)
+                    {
+                        // 
+                        if (tile.Id == 65 || tile.Id == 63 ||
+                            tile.Id == 48 || tile.Id == 49 || tile.Id == 50)
+                        {
+                            rec.Height = 30;
+                            soft = true;
+                        }
+
+                        // 
+                        if (tile.Id == 64 || tile.Id == 62 ||
+                            tile.Id == 34 || tile.Id == 35 || tile.Id == 37)
+                        {
+                            rec.Height = 20;
+                            soft = true;
+                        }
+                    }
+
+                    var block = new Block(rec, soft);
 
                     // 
                     Spatial.Add(block, block.Bounds);
@@ -130,28 +158,72 @@ namespace Superfluid
             return builder.CreateSprite();
         }
 
+        public static IEnumerable<T> QuerySpatial<T>(Rectangle rectangle)
+            where T : ISpatialObject
+        {
+            return Spatial.Query(rectangle)
+                          .Where(obj => obj is T)
+                          .Cast<T>();
+        }
+
         private static void OnUpdate(Graphics gfx, float dt)
         {
-            // Clear the screen
-            gfx.Clear(Color.DarkGray);
-
-            // Draw background (skybox)
-            var backgroundratio = gfx.Surface.Height / (float) (Map.Height * Map.TileSize.Height);
-            gfx.DrawImage(Background, Matrix.CreateScale(backgroundratio));
-
-            // Draw each map layer
-            for (var i = 0; i < Map.LayerCount; i++)
-            {
-                var layer = Map.GetLayer(i);
-                layer.Draw(gfx);
-            }
-
             // Update Entities
             foreach (var entity in Entities)
             {
                 entity.Update(dt);
             }
 
+            // Draw everything
+            Draw(gfx, dt);
+        }
+
+        private static void Draw(Graphics gfx, float dt)
+        {
+            var stageHeight = Map.Height * Map.TileSize.Height;
+            var stageWidth = Map.Width * Map.TileSize.Width;
+
+            // "Camera"
+            var offset = ((Vector) gfx.Surface.Size - (stageWidth, stageHeight)) / 2F;
+            gfx.GlobalTransform = Matrix.CreateTranslation((IntVector) offset);
+
+            // Draws the background image and frame
+            DrawBackground(gfx);
+
+            // Draws each map layer
+            for (var i = 0; i < Map.LayerCount; i++)
+            {
+                var layer = Map.GetLayer(i);
+                layer.Draw(gfx);
+            }
+
+            // Draws each entity
+            DrawEntities(gfx, dt);
+        }
+
+        private static void DrawBackground(Graphics gfx)
+        {
+            var stageHeight = Map.Height * Map.TileSize.Height;
+            var stageWidth = Map.Width * Map.TileSize.Width;
+
+            gfx.PushState();
+            {
+                // Draw background (skybox)
+                var backgroundRatio = Background.Height / (float) stageHeight;
+                gfx.DrawImage(Background, Matrix.CreateScale(backgroundRatio));
+
+                // Draw background (frame)
+                gfx.Color = BackgroundColor;
+                gfx.DrawRect((-stageWidth + 35, -stageHeight, stageWidth, stageHeight * 3));
+                gfx.DrawRect((0, -stageHeight + 35, stageWidth, stageHeight));
+                gfx.DrawRect((stageWidth - 35, -stageHeight, stageWidth, stageHeight * 3));
+                gfx.DrawRect((0, stageHeight - 35, stageWidth, stageHeight));
+            }
+            gfx.PopState();
+        }
+
+        private static void DrawEntities(Graphics gfx, float dt)
+        {
             // Draw Entities
             foreach (var entity in Entities)
             {
@@ -160,11 +232,12 @@ namespace Superfluid
                 gfx.PopState();
             }
 
-            DebugDraw(gfx);
+            // Draw debug information
+            DebugDrawEntities(gfx);
         }
 
         [Conditional("DEBUG")]
-        private static void DebugDraw(Graphics gfx)
+        private static void DebugDrawEntities(Graphics gfx)
         {
             // Debug Drawing for Entities
             foreach (var entity in Entities)

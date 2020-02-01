@@ -1,8 +1,10 @@
-﻿using Heirloom.Desktop;
+﻿using System.Linq;
+using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Math;
 
 using Superfluid.Engine;
+using Superfluid.Entities;
 
 namespace Superfluid.Actors
 {
@@ -13,8 +15,8 @@ namespace Superfluid.Actors
         public Player(Sprite sprite)
             : base(sprite)
         {
-            LocalBounds = Rectangle.Inflate(LocalBounds, -8);
-            LocalBounds = Rectangle.Offset(LocalBounds, (0, 8));
+            LocalBounds = Rectangle.Inflate(LocalBounds, -10);
+            LocalBounds = Rectangle.Offset(LocalBounds, (0, 10));
         }
 
         public bool KeyLeft => Input.GetKeyDown(Key.A);
@@ -38,21 +40,7 @@ namespace Superfluid.Actors
         {
             DetectJump();
 
-            // Movement keys differ (ie, one is pressed)
-            if (KeyLeft != KeyRight)
-            {
-                if (KeyLeft)
-                {
-                    Velocity = (-WalkSpeed, Velocity.Y);
-                    Facing = FaceDirection.Left;
-                }
-                else
-                {
-                    Velocity = (WalkSpeed, Velocity.Y);
-                    Facing = FaceDirection.Right;
-                }
-            }
-            else
+            if (!DetectMovement())
             {
                 GotoState(State.Idle);
             }
@@ -60,7 +48,16 @@ namespace Superfluid.Actors
 
         protected override void JumpUpdate(float dt)
         {
+            DetectMovement();
+        }
 
+        protected override void HurtUpdate(float dt)
+        {
+            // 
+        }
+
+        private bool DetectMovement()
+        {
             // Movement keys differ (ie, one is pressed)
             if (KeyLeft != KeyRight)
             {
@@ -74,12 +71,13 @@ namespace Superfluid.Actors
                     Velocity = (WalkSpeed, Velocity.Y);
                     Facing = FaceDirection.Right;
                 }
-            }
-        }
 
-        protected override void HurtUpdate(float dt)
-        {
-            // 
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private void DetectJump()
@@ -87,6 +85,12 @@ namespace Superfluid.Actors
             if (KeyJump)
             {
                 Velocity = (Velocity.X, -10);
+                GotoState(State.Jump);
+            }
+
+            // Fall detection
+            if (!Game.QuerySpatial<Block>(Rectangle.Inflate(Bounds, 0.5F)).Any())
+            {
                 GotoState(State.Jump);
             }
         }

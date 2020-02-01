@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Heirloom.Drawing;
 using Heirloom.Math;
 using Superfluid.Entities;
@@ -104,7 +105,7 @@ namespace Superfluid.Engine
 
             // Finds horizontal collision edges
             var range = Range.Indeterminate;
-            foreach (var block in Game.Spatial.Query(Bounds))
+            foreach (var block in Game.QuerySpatial<Block>(Bounds))
             {
                 range.Max = Calc.Max(block.Bounds.Right, range.Max);
                 range.Min = Calc.Min(block.Bounds.Left, range.Min);
@@ -147,7 +148,7 @@ namespace Superfluid.Engine
 
             // Finds vertical collision edges
             var range = Range.Indeterminate;
-            foreach (var block in Game.Spatial.Query(Bounds))
+            foreach (var block in Game.QuerySpatial<Block>(Bounds))
             {
                 range.Max = Calc.Max(block.Bounds.Bottom, range.Max);
                 range.Min = Calc.Min(block.Bounds.Top, range.Min);
@@ -216,10 +217,10 @@ namespace Superfluid.Engine
             gfx.DrawRectOutline(Bounds);
 
             // 
-            foreach (var block in Game.Spatial.Query(Bounds))
+            foreach (var spatial in Game.Spatial.Query(Rectangle.Inflate(Bounds, 8)))
             {
                 gfx.Color = Color.Orange;
-                gfx.DrawRectOutline(block.Bounds, 3);
+                gfx.DrawRectOutline(spatial.Bounds, 3);
             }
         }
 
