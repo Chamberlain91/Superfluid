@@ -1,8 +1,8 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Heirloom.Drawing;
 using Heirloom.Math;
-
+using Superfluid.Entities;
 using Range = Heirloom.Math.Range;
 
 namespace Superfluid.Engine
@@ -48,6 +48,8 @@ namespace Superfluid.Engine
 
         public Vector Velocity { get; set; }
 
+        protected State CurrentState => _stateMachine.State;
+
         public void SetAnimation(string name)
         {
             // 
@@ -81,8 +83,8 @@ namespace Superfluid.Engine
             Velocity += Vector.Down * 0.33F;
 
             // 
-            IntegrateHorizontal(dt);
             IntegrateVertical(dt);
+            IntegrateHorizontal(dt);
 
             // 
             Velocity = (Velocity.X * 0.33F, Velocity.Y);
@@ -96,10 +98,11 @@ namespace Superfluid.Engine
 
         private void IntegrateHorizontal(float dt)
         {
+            // Integrate horizontal
             Transform.Position += (Velocity.X, 0);
             ComputeBounds();
 
-            // Find thresholds
+            // Finds horizontal collision edges
             var range = Range.Indeterminate;
             foreach (var block in Game.Spatial.Query(Bounds))
             {
@@ -107,48 +110,42 @@ namespace Superfluid.Engine
                 range.Min = Calc.Min(block.Bounds.Left, range.Min);
             }
 
-            if (Velocity.X > 0)
-            // Moving right
+            var penetration = 0F;
+            if (range.Min < float.MaxValue && Velocity.X > 0)
             {
-                // If found a penetration
-                if (range.Min < float.MaxValue)
-                {
-                    // Push out of blocks
-                    var pen = Bounds.Right - range.Min;
-                    Transform.Position -= (pen + 1, 0);
-
-                    // Stop moving horizontally
-                    Velocity = (0, Velocity.Y);
-
-                    // Update bounds
-                    ComputeBounds();
-                }
+                // Right Collision
+                penetration = Bounds.Right - range.Min + 1F;
             }
-            else
-            // Moving left
+            else if (range.Max > float.MinValue && Velocity.X < 0)
             {
-                // If found a penetration
-                if (range.Max > float.MinValue)
-                {
-                    // Push out of blocks
-                    var pen = Bounds.Left - range.Max;
-                    Transform.Position -= (pen - 1, 0);
+                // Left Collision
+                penetration = Bounds.Left - range.Max - 1F;
+            }
 
-                    // Stop moving horizontally
-                    Velocity = (0, Velocity.Y);
+            // If penetrating a vertical surface, push out and trigger events
+            if (Calc.Abs(penetration) > 0)
+            {
+                // Push out of surface
+                Transform.Position -= (penetration, 0);
 
-                    // Update bounds
-                    ComputeBounds();
-                }
+                // Update bounds
+                ComputeBounds();
+
+                // Trigger Collision Flag
+                OnHorizontalCollision(Calc.Sign(penetration));
+
+                // Stop moving horizontally
+                Velocity = (0, Velocity.Y);
             }
         }
 
         private void IntegrateVertical(float dt)
         {
+            // Integrate vertically
             Transform.Position += (0, Velocity.Y);
             ComputeBounds();
 
-            // Find minimal threshold
+            // Finds vertical collision edges
             var range = Range.Indeterminate;
             foreach (var block in Game.Spatial.Query(Bounds))
             {
@@ -156,41 +153,38 @@ namespace Superfluid.Engine
                 range.Min = Calc.Min(block.Bounds.Top, range.Min);
             }
 
-            if (Velocity.Y > 0)
-            // Moving down
+            var penetration = 0F;
+            if (range.Min < float.MaxValue && Velocity.Y > 0)
             {
-                // If found a penetration
-                if (range.Min < float.MaxValue)
-                {
-                    // Push out of blocks
-                    var pen = Bounds.Bottom - range.Min;
-                    Transform.Position -= (0, pen + 0.2F);
-
-                    // Stop moving vertically
-                    Velocity = (Velocity.X, 0);
-
-                    // Update bounds
-                    ComputeBounds();
-                }
+                // Down Collision
+                penetration = Bounds.Bottom - range.Min + 0.2F;
             }
-            else
-            // Moving up
+            else if (range.Max > float.MinValue && Velocity.Y < 0)
             {
-                // If found a penetration
-                if (range.Max > float.MinValue)
-                {
-                    // Push out of blocks
-                    var pen = Bounds.Top - range.Max;
-                    Transform.Position -= (0, pen - 0.2F);
+                // Up Collision
+                penetration = Bounds.Top - range.Max - 0.2F;
+            }
 
-                    // Stop moving vertically
-                    Velocity = (Velocity.X, 0);
+            // If penetrating a vertical surface, push out and trigger events
+            if (Calc.Abs(penetration) > 0)
+            {
+                // Push out of surface
+                Transform.Position -= (0, penetration);
 
-                    // Update bounds
-                    ComputeBounds();
-                }
+                // Update bounds
+                ComputeBounds();
+
+                // Trigger Collision Flag
+                OnVerticalCollision(Calc.Sign(penetration));
+
+                // Stop moving vertically
+                Velocity = (Velocity.X, 0);
             }
         }
+
+        internal abstract void OnHorizontalCollision(int dir);
+
+        internal abstract void OnVerticalCollision(int dir);
 
         private void ComputeBounds()
         {

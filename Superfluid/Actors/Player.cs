@@ -17,24 +17,18 @@ namespace Superfluid.Actors
             LocalBounds = Rectangle.Offset(LocalBounds, (0, 8));
         }
 
-        public override void Update(float dt)
-        {
-            base.Update(dt);
+        public bool KeyLeft => Input.GetKeyDown(Key.A);
 
+        public bool KeyRight => Input.GetKeyDown(Key.D);
 
-            if (Input.GetKeyDown(Key.P))
-            {
-                Transform.Position = (300, 300);
-            }
-        }
+        public bool KeyJump => Input.GetKeyDown(Key.Space);
 
         protected override void IdleUpdate(float dt)
         {
-            var keyLeft = Input.GetKeyDown(Key.A);
-            var keyRight = Input.GetKeyDown(Key.D);
+            DetectJump();
 
             // Movement keys differ (ie, one is pressed)
-            if (keyLeft != keyRight)
+            if (KeyLeft != KeyRight)
             {
                 GotoState(State.Walk);
             }
@@ -42,13 +36,12 @@ namespace Superfluid.Actors
 
         protected override void WalkUpdate(float dt)
         {
-            var keyLeft = Input.GetKeyDown(Key.A);
-            var keyRight = Input.GetKeyDown(Key.D);
+            DetectJump();
 
             // Movement keys differ (ie, one is pressed)
-            if (keyLeft != keyRight)
+            if (KeyLeft != KeyRight)
             {
-                if (keyLeft)
+                if (KeyLeft)
                 {
                     Velocity = (-WalkSpeed, Velocity.Y);
                     Facing = FaceDirection.Left;
@@ -67,12 +60,48 @@ namespace Superfluid.Actors
 
         protected override void JumpUpdate(float dt)
         {
-            // 
+
+            // Movement keys differ (ie, one is pressed)
+            if (KeyLeft != KeyRight)
+            {
+                if (KeyLeft)
+                {
+                    Velocity = (-WalkSpeed, Velocity.Y);
+                    Facing = FaceDirection.Left;
+                }
+                else
+                {
+                    Velocity = (WalkSpeed, Velocity.Y);
+                    Facing = FaceDirection.Right;
+                }
+            }
         }
 
         protected override void HurtUpdate(float dt)
         {
             // 
+        }
+
+        private void DetectJump()
+        {
+            if (KeyJump)
+            {
+                Velocity = (Velocity.X, -10);
+                GotoState(State.Jump);
+            }
+        }
+
+        internal override void OnHorizontalCollision(int dir)
+        {
+            // 
+        }
+
+        internal override void OnVerticalCollision(int dir)
+        {
+            if (dir > 0 && CurrentState == State.Jump)
+            {
+                GotoState(State.Idle);
+            }
         }
     }
 }

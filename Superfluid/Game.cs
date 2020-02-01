@@ -1,4 +1,5 @@
-﻿using Heirloom.Collections;
+﻿using System.Diagnostics;
+using Heirloom.Collections;
 using Heirloom.Collections.Spatial;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
@@ -145,17 +146,30 @@ namespace Superfluid
                 layer.Draw(gfx);
             }
 
-            // Update entities
+            // Update Entities
             foreach (var entity in Entities)
             {
                 entity.Update(dt);
             }
 
-            // Draw entities
+            // Draw Entities
             foreach (var entity in Entities)
             {
                 gfx.PushState();
                 entity.Draw(gfx, dt);
+                gfx.PopState();
+            }
+
+            DebugDraw(gfx);
+        }
+
+        [Conditional("DEBUG")]
+        private static void DebugDraw(Graphics gfx)
+        {
+            // Debug Drawing for Entities
+            foreach (var entity in Entities)
+            {
+                gfx.PushState();
                 entity.DebugDraw(gfx);
                 gfx.PopState();
             }
