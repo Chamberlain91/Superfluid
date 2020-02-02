@@ -77,7 +77,7 @@ namespace Superfluid
 
                 // Create the game window
                 Window = new Window("Superfluid!");
-                Window.Graphics.EnableFPSOverlay = true;
+                // Window.Graphics.EnableFPSOverlay = true;
                 Window.Maximize();
 
                 // Bind Input
@@ -91,7 +91,7 @@ namespace Superfluid
                 // Load game assets
                 Assets.LoadDatabase();
 
-                PackImageAtals();
+                PackImageAtlas();
 
                 // Center origins on assets prefixed by string given
                 Assets.SetImagesCenterOrigin("crosshair102", "particle");
@@ -122,7 +122,7 @@ namespace Superfluid
             });
         }
 
-        private static void PackImageAtals()
+        private static void PackImageAtlas()
         {
             var atlas = new HashSet<Image>();
 
