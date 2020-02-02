@@ -28,6 +28,8 @@ namespace Superfluid
 
         public static TileMap Map { get; private set; }
 
+        public static Player Player { get; private set; }
+
         public static BoundingTreeSpatialCollection<ISpatialObject> Spatial { get; private set; }
 
         public static Matrix ScreenToWorld { get; private set; }
@@ -44,6 +46,9 @@ namespace Superfluid
 
         private static HashSet<Entity> _addEntities, _removeEntities;
         private static TypeDictionary<Entity> _entities;
+
+        private static float _elapsedTime;
+        private static Vector _cameraPos;
 
         private static void Main(string[] args)
         {
@@ -93,16 +98,19 @@ namespace Superfluid
                 // Load the background image
                 Background = Assets.GetImage("colored_desert");
 
-                // Load the test map
-                LoadMap("stage1");
+                // 
+                _elapsedTime = 0;
 
                 // Create the player actor
-                var player = AddEntity(new Player());
-                player.Transform.Position = (200, 300);
+                Player = AddEntity(new Player());
+                Player.Transform.Position = (200, 300);
 
                 // Create a test slime
-                var slime = AddEntity(new Slime());
-                slime.Transform.Position = (800, 300);
+                // var slime = AddEntity(new Slime());
+                // slime.Transform.Position = (800, 300);
+
+                // Load the test map
+                LoadMap("stage1"); // player spawn tile 80
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
@@ -386,6 +394,9 @@ namespace Superfluid
             foreach (var e in _addEntities) { _entities.Add(e); }
             _removeEntities.Clear(); _addEntities.Clear();
 
+            // 
+            _elapsedTime += dt;
+
             // Update Entities
             foreach (var entity in _entities)
             {
@@ -398,12 +409,13 @@ namespace Superfluid
 
         private static void Draw(Graphics gfx, float dt)
         {
-            var stageHeight = Map.Height * Map.TileSize.Height;
-            var stageWidth = Map.Width * Map.TileSize.Width;
+            // 
+            _cameraPos = Vector.Lerp(_cameraPos, Player.Bounds.Center, 5 * dt);
+            _cameraPos = Vector.Round(_cameraPos);
 
             // Compute and set the "Camera"
-            var cameraCenterOffset = ((Vector) gfx.Surface.Size - (stageWidth, stageHeight)) / 2F;
-            var cameraMatrix = Matrix.CreateTranslation((IntVector) cameraCenterOffset);
+            var cameraCenterOffset = ((Vector) gfx.Surface.Size) / 2F;
+            var cameraMatrix = Matrix.CreateTranslation((IntVector) cameraCenterOffset - _cameraPos);
             ScreenToWorld = Matrix.Inverse(cameraMatrix);
             gfx.GlobalTransform = cameraMatrix;
 
@@ -430,6 +442,21 @@ namespace Superfluid
 
             // Draw foreground
             foregroundLayer.Draw(gfx);
+
+            // Reset camera to window space
+            gfx.GlobalTransform = Matrix.Identity;
+
+            // Draw HUD
+            var timeStr = Time.GetEnglishTime(_elapsedTime);
+            var rect = TextLayout.Measure(timeStr, Font.Default, 64);
+            rect.Offset(10, 10);
+            rect.Inflate(8);
+
+            gfx.Color = Color.DarkGray;
+            gfx.DrawRect(rect);
+
+            gfx.Color = FlatColors.Emerald;
+            gfx.DrawText(timeStr, (10, 10), Font.Default, 64);
         }
 
         private static void DrawBackground(Graphics gfx)
