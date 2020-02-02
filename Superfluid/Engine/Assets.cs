@@ -6,6 +6,7 @@ using System.Linq;
 using Heirloom.Drawing;
 using Heirloom.IO;
 using Heirloom.Math;
+using Heirloom.Sound;
 
 namespace Superfluid.Engine
 {
@@ -19,6 +20,8 @@ namespace Superfluid.Engine
 
         private static readonly Dictionary<string, TileSet> _tileSets = new Dictionary<string, TileSet>();
 
+        private static readonly Dictionary<string, AudioClip> _clips = new Dictionary<string, AudioClip>();
+
         private static readonly HashSet<string> _loaded = new HashSet<string>();
 
         public static IEnumerable<string> ImageNames => _images.Keys;
@@ -26,6 +29,8 @@ namespace Superfluid.Engine
         public static IEnumerable<string> TileMapNames => _tileMaps.Keys;
 
         public static IEnumerable<string> TileSetNames => _tileSets.Keys;
+
+        public static IEnumerable<string> AudioClipNames => _clips.Keys;
 
         public static void LoadDatabase()
         {
@@ -105,6 +110,11 @@ namespace Superfluid.Engine
                         _tileSets[name] = new TileSet(stream);
                         break;
 
+                    case ".wav":
+                        // Load .wav
+                        _clips[name] = new AudioClip(stream);
+                        break;
+
                     default:
                         // Didn't know what to do with this asset
                         Log.Warn($"Asset: '{identifier}' not loaded.");
@@ -178,6 +188,23 @@ namespace Superfluid.Engine
 
             // Identifier not known
             throw new FileNotFoundException($"Unable to find tile map '{name}'.");
+        }
+
+        /// <summary>
+        /// Get an audio clip by name.
+        /// </summary>
+        public static AudioClip GetAudioClip(string name)
+        {
+            ForbidBlank(name, nameof(name));
+
+            // Try to get audio clip
+            if (_clips.TryGetValue(name, out var clip))
+            {
+                return clip;
+            }
+
+            // Identifier not known
+            throw new FileNotFoundException($"Unable to find audio clip '{name}'.");
         }
 
         /// <summary>

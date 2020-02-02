@@ -13,12 +13,13 @@ namespace Superfluid.Entities
         public Image Image { get; }
 
         private bool IsBloodThirsty { get; }
-        
+
         public Laser(bool isBloodThirsty)
         {
             Image = Assets.GetImage("particlewhite_4");
             Transform.Scale = (0.2F, 0.2F);
             IsBloodThirsty = isBloodThirsty;
+            Game.PlaySound("shoot");
         }
 
         public override void Update(float dt)
@@ -31,10 +32,10 @@ namespace Superfluid.Entities
             var pipes = Game.QuerySpatial<Pipe>(circle);
             var enemies = Game.FindEntities<Enemy>().Where(e => e.Bounds.Overlaps(circle));
             var color = Color.Red;
-            
 
             // Helper function
-            void AddSparks(Color color) {
+            void AddSparks(Color color)
+            {
                 // Schedule add sparks
                 for (var i = 0; i < 3; i++)
                 {
@@ -46,51 +47,55 @@ namespace Superfluid.Entities
                 Game.RemoveEntity(this);
             }
 
-            if (!IsBloodThirsty) {
+            if (!IsBloodThirsty)
+            {
                 color = Color.Green;
                 // Collides with pipe -> Repair
                 if (pipes.Any())
                 {
                     AddSparks(color);
 
-                    foreach (Pipe p in pipes)
+                    Game.PlaySound("hit");
+                    foreach (var p in pipes)
                     {
                         p.HealDamage();
                     }
                 }
-            } 
-            else {
+            }
+            else
+            {
                 // Colides with enemy -> damage
-                if(enemies.Any())
+                if (enemies.Any())
                 {
                     AddSparks(color);
-                    
-                    foreach (Enemy e in enemies)
+
+                    Game.PlaySound("hurt");
+                    foreach (var e in enemies)
                     {
                         e.TakeDamage(34);
                     }
-                    
                 }
             }
 
             // Collides with block
             if (blocks.Any())
             {
+                Game.PlaySound("hit");
                 AddSparks(color);
             }
         }
 
         public override void Draw(Graphics gfx, float dt)
         {
-            if (IsBloodThirsty) 
+            if (IsBloodThirsty)
             {
                 gfx.Color = Color.Red;
-            } 
+            }
             else
             {
                 gfx.Color = Color.Green;
-            } 
-            
+            }
+
             gfx.DrawImage(Image, Transform);
         }
     }

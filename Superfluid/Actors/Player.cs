@@ -3,7 +3,7 @@
 using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Math;
-
+using Heirloom.Sound;
 using Superfluid.Engine;
 using Superfluid.Entities;
 
@@ -106,7 +106,10 @@ namespace Superfluid.Actors
                 // Test grab distance, if further than ~2x tiles away, reject
                 if (Vector.Distance(Bounds.Center, mouseWorld) < PickupRadius)
                 {
-                    Game.Pipes.Pickup(mouseWorld, ref Pocket);
+                    if (Game.Pipes.Pickup(mouseWorld, ref Pocket))
+                    {
+                        Game.PlaySound("pickup");
+                    }
                 }
 
                 _canGrab = false;
@@ -203,6 +206,7 @@ namespace Superfluid.Actors
             if (InputJump)
             {
                 Velocity = (Velocity.X, -10);
+                Game.PlaySound("jump");
                 GotoState(State.Jump);
             }
 

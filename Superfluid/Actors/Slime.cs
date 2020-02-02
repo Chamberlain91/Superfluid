@@ -112,6 +112,8 @@ namespace Superfluid.Actors
                     }
                     else
                     {
+                        Game.PlaySound("jump2");
+
                         var xvel = Facing == FaceDirection.Right ? 4 : -4;
                         Velocity = (Velocity.X + xvel, -13);
                         GotoState(State.Jump);

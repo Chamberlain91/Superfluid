@@ -394,6 +394,12 @@ namespace Superfluid
             return items.ToArray();
         }
 
+        public static void PlaySound(string name)
+        {
+            var src = new AudioSource(Assets.GetAudioClip(name));
+            src.Play();
+        }
+
         private static void OnUpdate(Graphics gfx, float dt)
         {
             // Go to next stage, etc
