@@ -12,12 +12,27 @@ namespace Superfluid.Actors
     {
         private static readonly Sprite _sprite = CreateSprite();
 
+        private Range _jumpTimeRange = new Range(4, 8);
+        private float _jumpTime;
+
+        private Range _flipTimeRange = new Range(4, 8);
+        private float _flipTime;
+
+        private float _wantFallTime;
+
         public Slime()
             : base(_sprite, maxHealth: 100)
         {
             // Shrink bounds a little
             LocalBounds = Rectangle.Inflate(LocalBounds, -4);
             LocalBounds = Rectangle.Offset(LocalBounds, (0, 4));
+
+            // Start with random direction
+            Facing = Calc.Random.Choose(FaceDirection.Left, FaceDirection.Right);
+
+            // 
+            _jumpTime = _jumpTimeRange.Random;
+            _flipTime = _flipTimeRange.Random;
 
             // Start in walking state
             GotoState(State.Walk);
@@ -43,30 +58,76 @@ namespace Superfluid.Actors
 
         protected override void WalkUpdate(float dt)
         {
-            if (Facing == FaceDirection.Left) { Velocity = (-1, Velocity.Y); }
-            else { Velocity = (+1, Velocity.Y); }
+            if (Facing == FaceDirection.Left) { Velocity = (-1.5F, Velocity.Y); }
+            else { Velocity = (+1.5F, Velocity.Y); }
 
             // Near/Touching a pipe
             if (Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0 && !p.IsGoldPipe).Any())
             {
                 GotoState(State.Idle);
             }
+
+            // 
+            RandomizerUpdate(dt);
         }
 
         protected override void IdleUpdate(float dt)
         {
             Velocity = (0, Velocity.Y);
 
-            var pipes = Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0);
+            var pipes = Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0 && !p.IsGoldPipe);
 
             // Not near a pipe
-            if (!pipes.Any())
+            if (!pipes.Any()) { GotoState(State.Walk); }
+            // Attack nearest pipe
+            else { AttackPipe(dt, pipes.First()); }
+
+            // 
+            RandomizerUpdate(dt);
+        }
+
+        private void RandomizerUpdate(float dt)
+        {
+            if (_wantFallTime > 0)
             {
-                GotoState(State.Walk);
+                _wantFallTime -= dt;
+                WantFallDown = true;
             }
             else
             {
-                AttackPipe(dt, pipes.First());
+                _jumpTime -= dt;
+                _flipTime -= dt;
+
+                WantFallDown = false;
+
+                // Jump timer
+                if (_jumpTime < 0)
+                {
+                    _jumpTime = _jumpTimeRange.Random;
+
+                    if (Calc.Random.Chance(0.5F))
+                    {
+                        // Fall
+                        _wantFallTime = 0.5F;
+                    }
+                    else
+                    {
+                        Game.PlaySound("jump2");
+
+                        var xvel = Facing == FaceDirection.Right ? 4 : -4;
+                        Velocity = (Velocity.X + xvel, -13);
+                        GotoState(State.Jump);
+                    }
+                }
+
+                // Flip timer
+                if (_flipTime < 0)
+                {
+                    _flipTime = _flipTimeRange.Random;
+
+                    // Flip direction
+                    FlipFacing();
+                }
             }
         }
 
@@ -74,11 +135,6 @@ namespace Superfluid.Actors
         {
             if (dir == -1 && Facing == FaceDirection.Left) { Facing = FaceDirection.Right; }
             if (dir == +1 && Facing == FaceDirection.Right) { Facing = FaceDirection.Left; }
-        }
-
-        internal override void OnVerticalCollision(int dir)
-        {
-            // nada
         }
     }
 }

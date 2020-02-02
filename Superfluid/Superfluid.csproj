@@ -519,9 +519,15 @@
     <None Remove="Assets\Images\Players\Yellow\alienYellow_swim2.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_walk1.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_walk2.png" />
-    <None Remove="Assets\Maps\AllPipes.tmx" />
-    <None Remove="Assets\Maps\TestMap.tmx" />
+    <None Remove="Assets\Maps\Stage1.tmx" />
+    <None Remove="Assets\Maps\Stage3.tmx" />
     <None Remove="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
+    <None Remove="Assets\Sounds\hit.wav" />
+    <None Remove="Assets\Sounds\hurt.wav" />
+    <None Remove="Assets\Sounds\jump.wav" />
+    <None Remove="Assets\Sounds\jump2.wav" />
+    <None Remove="Assets\Sounds\pickup.wav" />
+    <None Remove="Assets\Sounds\shoot.wav" />
     <None Remove="Assets\Tilesets\Industrial.tsx" />
     <None Remove="Assets\Tilesets\Pipes.tsx" />
     <None Remove="Assets\Tilesets\SuperFluidTiles.tsx" />
@@ -1016,9 +1022,15 @@
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_swim2.png" />
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk1.png" />
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk2.png" />
-    <EmbeddedResource Include="Assets\Maps\AllPipes.tmx" />
-    <EmbeddedResource Include="Assets\Maps\TestMap.tmx" />
+    <EmbeddedResource Include="Assets\Maps\Stage3.tmx" />
+    <EmbeddedResource Include="Assets\Maps\Stage1.tmx" />
     <EmbeddedResource Include="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
+    <EmbeddedResource Include="Assets\Sounds\hit.wav" />
+    <EmbeddedResource Include="Assets\Sounds\hurt.wav" />
+    <EmbeddedResource Include="Assets\Sounds\jump.wav" />
+    <EmbeddedResource Include="Assets\Sounds\jump2.wav" />
+    <EmbeddedResource Include="Assets\Sounds\pickup.wav" />
+    <EmbeddedResource Include="Assets\Sounds\shoot.wav" />
     <EmbeddedResource Include="Assets\Tilesets\Industrial.tsx" />
     <EmbeddedResource Include="Assets\Tilesets\Pipes.tsx" />
   </ItemGroup>

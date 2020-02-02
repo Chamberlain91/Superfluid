@@ -3,7 +3,7 @@
 using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Math;
-
+using Heirloom.Sound;
 using Superfluid.Engine;
 using Superfluid.Entities;
 
@@ -95,6 +95,9 @@ namespace Superfluid.Actors
 
         private void DetectPickUp()
         {
+            // No need to disconnect the working pipes
+            if (Game.Pipes.IsComplete) { return; }
+
             // Pressing grab and can grab
             if (InputGrab && _canGrab)
             {
@@ -103,7 +106,10 @@ namespace Superfluid.Actors
                 // Test grab distance, if further than ~2x tiles away, reject
                 if (Vector.Distance(Bounds.Center, mouseWorld) < PickupRadius)
                 {
-                    Game.Pipes.Pickup(mouseWorld, ref Pocket);
+                    if (Game.Pipes.Pickup(mouseWorld, ref Pocket))
+                    {
+                        Game.PlaySound("pickup");
+                    }
                 }
 
                 _canGrab = false;
@@ -118,14 +124,13 @@ namespace Superfluid.Actors
 
         private void DetectGunMode()
         {
-            if (InputKill)
+            if (InputKill && _killingIntent != true)
             {
-                // Sets the cursor
                 Game.Window.SetCursor(Game.KillCursor);
                 _killingIntent = true;
             }
 
-            if (InputHeal)
+            if (InputHeal && _killingIntent != false)
             {
                 Game.Window.SetCursor(Game.HealCursor);
                 _killingIntent = false;
@@ -201,6 +206,7 @@ namespace Superfluid.Actors
             if (InputJump)
             {
                 Velocity = (Velocity.X, -10);
+                Game.PlaySound("jump");
                 GotoState(State.Jump);
             }
 
@@ -222,14 +228,6 @@ namespace Superfluid.Actors
         internal override void OnHorizontalCollision(int dir)
         {
             // 
-        }
-
-        internal override void OnVerticalCollision(int dir)
-        {
-            if (dir > 0 && CurrentState == State.Jump)
-            {
-                GotoState(State.Idle);
-            }
         }
 
         public override void Draw(Graphics gfx, float dt)

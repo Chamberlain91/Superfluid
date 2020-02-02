@@ -12,6 +12,8 @@ namespace Superfluid
     {
         private readonly List<Pipe> _pipes = new List<Pipe>();
 
+        public bool IsComplete { get; private set; }
+
         public void Clear()
         {
             _pipes.Clear();
@@ -35,10 +37,18 @@ namespace Superfluid
             // 
             if (CheckCompleteConnection(out var pipes))
             {
+                // 
+                IsComplete = true;
+
+                // Cause animation
                 foreach (var pipe in pipes)
                 {
                     pipe.IsFunctional = true;
                 }
+            }
+            else
+            {
+                IsComplete = false;
             }
         }
 
@@ -75,9 +85,9 @@ namespace Superfluid
 
             static bool CheckConnection(Pipe source, Pipe target)
             {
-                // Broken pipes, no good
-                if (source.Health < 1) { return false; }
-                if (target.Health < 1) { return false; }
+                // Broken pipes are no good
+                if (source.Health < 100) { return false; }
+                if (target.Health < 100) { return false; }
 
                 // 
                 foreach (var connectionPoint in source.GetValidConnectionPoints())
