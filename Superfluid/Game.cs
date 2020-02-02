@@ -54,10 +54,10 @@ namespace Superfluid
         public static int StageIndex;
         public static string[] StageNames =
         {
-            "stage4", // eileen be mean
             "stage1", // intro
             "stage2", // more
             "stage3", // tall
+            "stage4", // eileen be mean
         };
 
         private static void Main(string[] args)
