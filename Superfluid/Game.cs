@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 using Heirloom.Collections;
@@ -89,7 +90,8 @@ namespace Superfluid
 
                 // Load game assets
                 Assets.LoadDatabase();
-                Assets.PackAtlas();
+
+                PackImageAtals();
 
                 // Center origins on assets prefixed by string given
                 Assets.SetImagesCenterOrigin("crosshair102", "particle");
@@ -118,6 +120,47 @@ namespace Superfluid
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
                 Loop.Start();
             });
+        }
+
+        private static void PackImageAtals()
+        {
+            var atlas = new HashSet<Image>();
+
+            // Pack tiles
+            foreach (var mapName in Assets.TileMapNames)
+            {
+                var map = Assets.GetMap(mapName);
+                for (var l = 0; l < map.LayerCount; l++)
+                {
+                    var layer = map.GetLayer(l);
+                    foreach (var (x, y) in Rasterizer.Rectangle(map.Size))
+                    {
+                        var tile = layer.GetTile(x, y);
+                        if (tile != null)
+                        {
+                            atlas.Add(tile.Image);
+                        }
+                    }
+                }
+            }
+
+            // Pack sprites
+            foreach (var imageName in Assets.ImageNames)
+            {
+                if (imageName.EndsWith("_crop.png")
+                    || imageName.StartsWith("slime_") || imageName == "slime"
+                    || imageName == "particlewhite_4" || imageName == "particlewhite_2"
+                    || imageName == "colored_desert")
+                {
+                    atlas.Add(Assets.GetImage(imageName));
+                }
+            }
+
+            // Actually pack atlas
+            var atlasImage = Image.CreateAtlas(atlas);
+
+            var stream = new FileStream("test.png", FileMode.Create);
+            atlasImage.WriteToPng(stream);
         }
 
         /// <summary>
