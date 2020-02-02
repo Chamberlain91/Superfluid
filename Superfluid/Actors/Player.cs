@@ -17,6 +17,8 @@ namespace Superfluid.Actors
 
         private float _shootTime = ShootRate;
 
+        private bool _killingIntent = true;
+
         public Player()
             : base(CreatePlayerSprite())
         {
@@ -31,6 +33,10 @@ namespace Superfluid.Actors
         public bool InputJump => Input.GetKeyDown(Key.Space);
 
         public bool InputDown => Input.GetKeyDown(Key.S);
+
+        public bool InputKill => Input.GetKeyDown(Key.Q);
+
+        public bool InputHeal => Input.GetKeyDown(Key.E);
 
         public bool InputShoot => Input.GetMouseDown(0);
 
@@ -74,7 +80,7 @@ namespace Superfluid.Actors
                 var dir = (mouseWorld - Transform.Position).Normalized;
 
                 // 
-                var laser = new Laser();
+                var laser = new Laser(_killingIntent);
                 laser.Transform.Position = Transform.Position;
                 laser.Transform.Direction = dir;
 
@@ -98,6 +104,19 @@ namespace Superfluid.Actors
             {
                 // Allow grabbing again 
                 _canGrab = true;
+            }
+        }
+
+        private void DetectGunMode()
+        {
+            if (InputKill)
+            {
+                _killingIntent = true;
+            }
+
+            if (InputHeal)
+            {
+                _killingIntent = false;
             }
         }
 
