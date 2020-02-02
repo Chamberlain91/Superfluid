@@ -11,6 +11,8 @@ namespace Superfluid.Actors
 {
     public class Player : Actor
     {
+        public const float PickupRadius = 170;
+
         public const float WalkSpeed = 4;
 
         public const float ShootRate = 0.33F;
@@ -96,10 +98,14 @@ namespace Superfluid.Actors
             // Pressing grab and can grab
             if (InputGrab && _canGrab)
             {
-                // TODO: Check if grabbing pipe
                 var mouseWorld = Game.ScreenToWorld * Input.MousePosition;
-                var grabSuccess = Game.Pipes.Pickup(mouseWorld, ref Pocket);
-                Log.Warn($"Grab: {grabSuccess}");
+
+                // Test grab distance, if further than ~2x tiles away, reject
+                if (Vector.Distance(Bounds.Center, mouseWorld) < PickupRadius)
+                {
+                    Game.Pipes.Pickup(mouseWorld, ref Pocket);
+                }
+
                 _canGrab = false;
             }
             // Not pressing grab
@@ -233,10 +239,18 @@ namespace Superfluid.Actors
             // 
             if (Pocket != null)
             {
-                var gridMouse = Input.GetGridMousePosition();
+                var mouseGrid = Input.GetGridMousePosition();
+                var mouseTest = mouseGrid + (35, 35);
 
-                gfx.Color = new Color(0, 0, 0, 0.1F);
-                gfx.DrawImage(Pocket.Image, Matrix.CreateTranslation(gridMouse));
+                var alpha = 0.40F;
+                if (Vector.Distance(Bounds.Center, mouseTest) > PickupRadius)
+                {
+                    alpha = 0.15F;
+                }
+
+                // Pocket shadow
+                gfx.Color = new Color(alpha, alpha, alpha, alpha);
+                gfx.DrawImage(Pocket.Image, Matrix.CreateTranslation(mouseGrid));
             }
         }
 

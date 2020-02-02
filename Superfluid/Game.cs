@@ -94,7 +94,7 @@ namespace Superfluid
                 Background = Assets.GetImage("colored_desert");
 
                 // Load the test map
-                LoadMap("allpipes");
+                LoadMap("stage1");
 
                 // Create the player actor
                 var player = AddEntity(new Player());
