@@ -522,6 +522,7 @@
     <None Remove="Assets\Maps\Stage1.tmx" />
     <None Remove="Assets\Maps\Stage2.tmx" />
     <None Remove="Assets\Maps\Stage3.tmx" />
+    <None Remove="Assets\Maps\Stage4.tmx" />
     <None Remove="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
     <None Remove="Assets\Sounds\hit.wav" />
     <None Remove="Assets\Sounds\hurt.wav" />
@@ -1023,9 +1024,10 @@
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_swim2.png" />
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk1.png" />
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk2.png" />
-    <EmbeddedResource Include="Assets\Maps\Stage2.tmx" />
     <EmbeddedResource Include="Assets\Maps\Stage3.tmx" />
+    <EmbeddedResource Include="Assets\Maps\Stage2.tmx" />
     <EmbeddedResource Include="Assets\Maps\Stage1.tmx" />
+    <EmbeddedResource Include="Assets\Maps\Stage4.tmx" />
     <EmbeddedResource Include="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
     <EmbeddedResource Include="Assets\Sounds\hit.wav" />
     <EmbeddedResource Include="Assets\Sounds\hurt.wav" />
