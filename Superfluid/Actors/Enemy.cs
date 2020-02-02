@@ -29,7 +29,7 @@ namespace Superfluid.Actors
 
         public float AttackTimer { get; set; }
 
-        public float AttackPower { get; set; } = 2;
+        public float AttackPower { get; set; } = 5;
 
         public void TakeDamage(float damage)
         {

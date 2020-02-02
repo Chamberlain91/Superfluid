@@ -85,9 +85,9 @@ namespace Superfluid
 
             static bool CheckConnection(Pipe source, Pipe target)
             {
-                // Broken pipes, no good
-                if (source.Health < 1) { return false; }
-                if (target.Health < 1) { return false; }
+                // Broken pipes are no good
+                if (source.Health < 100) { return false; }
+                if (target.Health < 100) { return false; }
 
                 // 
                 foreach (var connectionPoint in source.GetValidConnectionPoints())

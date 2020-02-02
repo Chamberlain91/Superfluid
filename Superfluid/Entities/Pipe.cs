@@ -72,7 +72,7 @@ namespace Superfluid.Entities
             Game.Pipes.EvaluatePipeConfiguration();
         }
 
-        public void HealDamage(float amount = 5)
+        public void HealDamage(float amount = 20)
         {
             if (Health < MaxHealth)
             {
@@ -125,11 +125,11 @@ namespace Superfluid.Entities
                 gfx.DrawImage(Image, Transform);
             }
 
-            // 
+            // Draw damage
             if (Health < MaxHealth)
             {
                 gfx.Color = FlatColors.Alizarin;
-                gfx.DrawText($"{Health}", Bounds.Center, Font.Default, 64, TextAlign.Center);
+                gfx.DrawText($"{Health}", Bounds.Center - (0, 32), Font.Default, 64, TextAlign.Center);
             }
         }
 

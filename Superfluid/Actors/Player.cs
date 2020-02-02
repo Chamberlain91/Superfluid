@@ -95,6 +95,9 @@ namespace Superfluid.Actors
 
         private void DetectPickUp()
         {
+            // No need to disconnect the working pipes
+            if (Game.Pipes.IsComplete) { return; }
+
             // Pressing grab and can grab
             if (InputGrab && _canGrab)
             {
