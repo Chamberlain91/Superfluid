@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 using Heirloom.Drawing;
 using Heirloom.Math;
 
@@ -9,14 +12,18 @@ namespace Superfluid.Entities
     {
         public Image Image;
 
-        public Pipe(Image image, Rectangle localBounds,
-                    IntVector offset1, IntVector offset2,
-                    bool isGoldPipe)
+        public Pipe(Image image, Rectangle localBounds, IEnumerable<Vector> localOffsets, bool isGoldPipe)
         {
             Image = image;
+
+            Connections = new HashSet<Pipe>();
+
             LocalBounds = localBounds;
-            Offset1 = offset1;
-            Offset2 = offset2;
+            Bounds = localBounds;
+
+            LocalConnectPoints = localOffsets.ToArray();
+            ConnectPoints = localOffsets.ToArray();
+
             IsGoldPipe = isGoldPipe;
 
             // Draw behind ground layer
@@ -25,25 +32,45 @@ namespace Superfluid.Entities
 
         public Rectangle LocalBounds { get; }
 
+        public readonly Vector[] LocalConnectPoints;
+
         public Rectangle Bounds { get; private set; }
 
-        public IntVector Offset1 { get; }
-
-        public IntVector Offset2 { get; }
+        public readonly Vector[] ConnectPoints;
 
         public bool IsGoldPipe { get; }
+
+        public HashSet<Pipe> Connections { get; }
 
         public override void Update(float dt)
         {
             // nada
         }
 
-        public void ComputeWorldBounds()
+        public void ComputeWorldSpace()
         {
             // Computes world bounds
             var bounds = LocalBounds;
             bounds.Position += Transform.Position;
             Bounds = bounds;
+
+            // Compute connection offsets
+            ConnectPoints[0] = LocalConnectPoints[0] + Transform.Position;
+            ConnectPoints[1] = LocalConnectPoints[1] + Transform.Position;
+        }
+
+        public IEnumerable<Vector> GetValidConnectionPoints()
+        {
+            var worldBounds = new Rectangle(Vector.Zero, Game.Map.Size * Game.Map.TileSize);
+
+            // Emits coordinates inside the world
+            foreach (var pt in ConnectPoints)
+            {
+                if (worldBounds.ContainsPoint(pt))
+                {
+                    yield return pt;
+                }
+            }
         }
 
         public override void Draw(Graphics gfx, float dt)
@@ -56,14 +83,17 @@ namespace Superfluid.Entities
             gfx.Color = Color.Black;
             gfx.DrawRectOutline(Bounds);
 
+            // 
             gfx.Color = Color.Pink;
-            var a = Transform.Position + (Offset1 * 70) + (35, 35);
-            var b = Transform.Position + (Offset2 * 70) + (35, 35);
-            gfx.DrawCross(a, 24, 4);
-            gfx.DrawCross(b, 24, 4);
+            foreach (var pt in GetValidConnectionPoints())
+            {
+                gfx.DrawCross(pt, 8, 2);
+            }
 
-            gfx.Color = Color.Orange;
-            gfx.DrawLine(a, b, 2);
+            foreach (var con in Connections)
+            {
+                gfx.DrawLine(Bounds.Center, con.Bounds.Center);
+            }
         }
     }
 }
