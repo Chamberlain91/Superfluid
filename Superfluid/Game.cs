@@ -50,6 +50,13 @@ namespace Superfluid
         private static float _elapsedTime;
         private static Vector _cameraPos;
 
+        public static int StageIndex;
+        public static string[] StageNames =
+        {
+            "stage1",
+            "stage3"
+        };
+
         private static void Main(string[] args)
         {
             Application.Run(() =>
@@ -110,7 +117,7 @@ namespace Superfluid
                 // slime.Transform.Position = (800, 300);
 
                 // Load the test map
-                LoadMap("stage1"); // player spawn tile 80
+                LoadMap(StageNames[StageIndex]);
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
@@ -176,6 +183,7 @@ namespace Superfluid
             Map = Assets.GetMap(name);
 
             // Get Layers
+            var spawnLayer = Map.GetLayer("spawn");
             var groundLayer = Map.GetLayer("ground");
             var pipeLayer = Map.GetLayer("pipes");
 
@@ -192,6 +200,15 @@ namespace Superfluid
                 if (pipeTile != null)
                 {
                     LoadMapProcessPipesTiles(x, y, pipeTile);
+                }
+
+                var spawnTile = spawnLayer.GetTile(x, y);
+                if (spawnTile != null)
+                {
+                    if (spawnTile.Id == 80)
+                    {
+                        Player.Transform.Position = new Vector(x, y) * 70 + (35, 15);
+                    }
                 }
             }
 
@@ -395,7 +412,22 @@ namespace Superfluid
             _removeEntities.Clear(); _addEntities.Clear();
 
             // 
-            _elapsedTime += dt;
+            if (!Pipes.IsComplete)
+            {
+                _elapsedTime += dt;
+            }
+            else if (Input.GetKeyDown(Key.Enter))
+            {
+                StageIndex++;
+                if (StageIndex >= StageNames.Length)
+                {
+                    // TODO: remove this demo style reset
+                    _elapsedTime = 0;
+                    StageIndex = 0;
+                }
+
+                LoadMap(StageNames[StageIndex]);
+            }
 
             // Update Entities
             foreach (var entity in _entities)
@@ -448,7 +480,12 @@ namespace Superfluid
 
             // Draw HUD
             var timeStr = Time.GetEnglishTime(_elapsedTime);
-            var rect = TextLayout.Measure(timeStr, Font.Default, 64);
+            if (Pipes.IsComplete)
+            {
+                timeStr += " [Press Enter To Go Next Stage]";
+            }
+
+            var rect = TextLayout.Measure(timeStr, Font.Default, 32);
             rect.Offset(10, 10);
             rect.Inflate(8);
 
@@ -456,7 +493,7 @@ namespace Superfluid
             gfx.DrawRect(rect);
 
             gfx.Color = FlatColors.Emerald;
-            gfx.DrawText(timeStr, (10, 10), Font.Default, 64);
+            gfx.DrawText(timeStr, (10, 10), Font.Default, 32);
         }
 
         private static void DrawBackground(Graphics gfx)
