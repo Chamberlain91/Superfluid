@@ -11,6 +11,8 @@ namespace Superfluid.Actors
 {
     public class Player : Actor
     {
+        
+
         public const float WalkSpeed = 4;
 
         public const float ShootRate = 0.33F;
@@ -33,6 +35,8 @@ namespace Superfluid.Actors
         public bool InputDown => Input.GetKeyDown(Key.S);
 
         public bool InputShoot => Input.GetMouseDown(0);
+
+        public bool HasGrab => Input.GetMouseDown(1);
 
         protected override void IdleUpdate(float dt)
         {
@@ -70,6 +74,11 @@ namespace Superfluid.Actors
 
                 Game.AddEntity(laser);
             }
+        }
+
+        private void DetectPickUp() 
+        {
+            // TODO: UwU
         }
 
         protected override void WalkUpdate(float dt)
