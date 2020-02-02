@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -10,6 +11,7 @@ using Heirloom.Drawing.Extras;
 using Heirloom.IO;
 using Heirloom.Math;
 using Heirloom.Sound;
+
 using Superfluid.Actors;
 using Superfluid.Engine;
 using Superfluid.Entities;
@@ -22,17 +24,19 @@ namespace Superfluid
 
         public static RenderLoop Loop { get; private set; }
 
-        public static TileMap Map;
+        public static PipeManager Pipes { get; private set; }
 
-        public static Image Background;
+        public static TileMap Map { get; private set; }
 
         public static BoundingTreeSpatialCollection<ISpatialObject> Spatial { get; private set; }
 
-        public static Matrix ScreenToWorld;
+        public static Matrix ScreenToWorld { get; private set; }
+
+        public static AudioSource Music;
 
         public static Color BackgroundColor = Color.Parse("#95A5A6");
 
-        public static AudioSource BackgroundMusic;
+        public static Image Background;
 
         private static HashSet<Entity> _addSet, _remSet;
         private static TypeDictionary<Entity> _entities;
@@ -43,6 +47,9 @@ namespace Superfluid
             {
                 // Create spatial collection
                 Spatial = new BoundingTreeSpatialCollection<ISpatialObject>();
+
+                // 
+                Pipes = new PipeManager();
 
                 // Create entities collection
                 _entities = new TypeDictionary<Entity>();
@@ -60,9 +67,9 @@ namespace Superfluid
                 Input.AttachToWindow(Window);
 
                 // Load BGM
-                BackgroundMusic = new AudioSource(Files.OpenStream("assets/music/4222-pixelland-by-kevin-macleod.mp3"));
-                BackgroundMusic.IsLooping = true;
-                BackgroundMusic.Play();
+                Music = new AudioSource(Files.OpenStream("assets/music/4222-pixelland-by-kevin-macleod.mp3"));
+                Music.IsLooping = true;
+                Music.Play();
 
                 /*
                  * Music from https://filmmusic.io
@@ -101,24 +108,55 @@ namespace Superfluid
             });
         }
 
+        /// <summary>
+        /// Schedules to insert an entity into the stage next frame.
+        /// </summary>
         public static T AddEntity<T>(T entity) where T : Entity
         {
+            if (_entities.Contains(entity))
+            {
+                throw new InvalidOperationException($"Entity already exists in scene.");
+            }
+
             _remSet.Remove(entity);
             _addSet.Add(entity);
             return entity;
         }
 
+        /// <summary>
+        /// Schedules to remove an entity from the stage next frame.
+        /// </summary>
         public static void RemoveEntity(Entity entity)
         {
+            if (!_entities.Contains(entity))
+            {
+                throw new InvalidOperationException($"Entity does not exist in scene.");
+            }
+
             _addSet.Remove(entity);
             _remSet.Add(entity);
         }
 
+        /// <summary>
+        /// Gets the pipe at the specified location.
+        /// </summary>
+        public static Pipe GetPipe(Vector position)
+        {
+            var circle = new Circle(position, 10);
+            return Game.QuerySpatial<Pipe>(circle)
+                       .FirstOrDefault();
+        }
+
         private static void LoadMap(string name)
         {
-            Spatial.Clear();
+            // == Purge Existing Stage
 
-            // Load map data (load phase)
+            Spatial.Clear();
+            Pipes.Clear();
+
+            // == Load Phase
+
+            // Get map data
             Map = Assets.GetMap(name);
 
             // Get Layers
@@ -140,6 +178,9 @@ namespace Superfluid
                     LoadMapProcessPipesTiles(x, y, pipeTile);
                 }
             }
+
+            // Detect initial pipe configuration
+            Pipes.DetectPipeConnections();
         }
 
         private static void LoadMapProcessGroundTiles(int x, int y, Tile tile)
@@ -183,8 +224,8 @@ namespace Superfluid
             if (tile.TileSet == Assets.GetTileSet("pipes"))
             {
                 // Offsets for pipe openings
-                var offset1 = new IntVector();
-                var offset2 = new IntVector();
+                var offset1 = new Vector();
+                var offset2 = new Vector();
 
                 var bounds = new Rectangle(Vector.Zero, Map.TileSize);
 
@@ -264,11 +305,16 @@ namespace Superfluid
                 var position = new Vector(x, y) * (Vector) Map.TileSize;
                 position.Y += Map.TileSize.Height - tile.Image.Height; // weird tiled offset thing
 
+                // Compute connection points in world space
+                var points = new[] { offset1, offset2 }.Select(s => (35, 35) + (s * 70));
+
                 // Generate pipe
-                var pipe = AddEntity(new Pipe(tile.Image, bounds, offset1, offset2, isGoldPipe));
+                var pipe = AddEntity(new Pipe(tile.Image, bounds, points, isGoldPipe));
                 pipe.Transform.Position = position;
-                pipe.ComputeWorldBounds();
+                pipe.ComputeWorldSpace();
+
                 Spatial.Add(pipe, pipe.Bounds);
+                Pipes.Add(pipe);
             }
         }
 
