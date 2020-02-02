@@ -221,7 +221,13 @@ namespace Superfluid.Engine
 
         internal abstract void OnHorizontalCollision(int dir);
 
-        internal abstract void OnVerticalCollision(int dir);
+        internal virtual void OnVerticalCollision(int dir)
+        {
+            if (dir > 0 && CurrentState == State.Jump)
+            {
+                GotoState(State.Idle);
+            }
+        }
 
         private void ComputeBounds()
         {

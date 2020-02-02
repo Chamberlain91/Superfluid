@@ -215,7 +215,7 @@ namespace Superfluid
                     else
                     {
                         // Create spawner
-                        var spawner = AddEntity(new Spawner(count: 2, period: 5, () => new Slime()));
+                        var spawner = AddEntity(new Spawner(count: 2, period: 6, () => new Slime()));
                         spawner.Transform.Position = position;
                     }
                 }
@@ -430,8 +430,9 @@ namespace Superfluid
         {
             if (Pipes.IsComplete)
             {
-                // Kill spawners
+                // Kill enemies and spawners
                 foreach (var o in FindEntities<Spawner>()) { RemoveEntity(o); }
+                foreach (var o in FindEntities<Enemy>()) { RemoveEntity(o); }
 
                 // 
                 if (Input.GetKeyDown(Key.Enter))

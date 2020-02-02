@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Heirloom.Drawing;
+using Heirloom.Math;
 
 using Superfluid.Actors;
 using Superfluid.Engine;
@@ -10,12 +11,15 @@ namespace Superfluid.Entities
     public sealed class Spawner : Entity
     {
         private readonly Func<Enemy> _createEnemy;
-        private float _timer;
+        private float _time;
         private int _count;
 
         public Spawner(int count, float period, Func<Enemy> createEnemy)
         {
             _createEnemy = createEnemy;
+
+            // 
+            _time = period / 2 + Calc.Random.NextFloat(0, period / 2);
 
             SpawnPeriod = period;
             SpawnCount = count;
@@ -28,12 +32,12 @@ namespace Superfluid.Entities
         public override void Update(float dt)
         {
             // 
-            _timer -= dt;
+            _time -= dt;
 
             // 
-            if (_timer <= 0)
+            if (_time <= 0)
             {
-                _timer = SpawnPeriod;
+                _time = SpawnPeriod;
 
                 // 
                 if (_count < SpawnCount)

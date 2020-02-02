@@ -83,5 +83,11 @@ namespace Superfluid.Actors
 
             return false;
         }
+
+        public void FlipFacing()
+        {
+            if (Facing == FaceDirection.Left) { Facing = FaceDirection.Right; }
+            else { Facing = FaceDirection.Left; };
+        }
     }
 }

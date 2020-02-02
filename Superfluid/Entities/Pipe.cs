@@ -63,7 +63,7 @@ namespace Superfluid.Entities
 
             if (Health > 0)
             {
-                Log.Info($"Pipe Health = {Health} (Damage {damage})");
+                // Log.Info($"Pipe Health = {Health} (Damage {damage})");
                 Health -= damage;
             }
 
@@ -76,7 +76,7 @@ namespace Superfluid.Entities
         {
             if (Health < MaxHealth)
             {
-                Log.Info($"Pipe Health = {Health} (Heal {amount})");
+                // Log.Info($"Pipe Health = {Health} (Heal {amount})");
                 Health += amount;
             }
 

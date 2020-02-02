@@ -226,14 +226,6 @@ namespace Superfluid.Actors
             // 
         }
 
-        internal override void OnVerticalCollision(int dir)
-        {
-            if (dir > 0 && CurrentState == State.Jump)
-            {
-                GotoState(State.Idle);
-            }
-        }
-
         public override void Draw(Graphics gfx, float dt)
         {
             base.Draw(gfx, dt);
