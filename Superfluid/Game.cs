@@ -157,10 +157,7 @@ namespace Superfluid
             }
 
             // Actually pack atlas
-            var atlasImage = Image.CreateAtlas(atlas);
-
-            var stream = new FileStream("test.png", FileMode.Create);
-            atlasImage.WriteToPng(stream);
+            Image.CreateAtlas(atlas);
         }
 
         /// <summary>
