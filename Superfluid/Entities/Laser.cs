@@ -30,13 +30,15 @@ namespace Superfluid.Entities
             var blocks = Game.QuerySpatial<Block>(circle);
             var pipes = Game.QuerySpatial<Pipe>(circle);
             var enemies = Game.FindEntities<Enemy>().Where(e => e.Bounds.Overlaps(circle));
+            var color = Color.Red;
+            
 
             // Helper function
-            void AddSparks() {
+            void AddSparks(Color color) {
                 // Schedule add sparks
                 for (var i = 0; i < 3; i++)
                 {
-                    var spark = Game.AddEntity(new Spark(Color.Red));
+                    var spark = Game.AddEntity(new Spark(color));
                     spark.Transform.Position = Transform.Position;
                 }
 
@@ -44,18 +46,12 @@ namespace Superfluid.Entities
                 Game.RemoveEntity(this);
             }
 
-            // Collides with block
-            if (blocks.Any())
-            {
-                AddSparks();
-            }
-
             if (!IsBloodThirsty) {
-            // Collides with pipe -> Repair
+                color = Color.Green;
+                // Collides with pipe -> Repair
                 if (pipes.Any())
                 {
-                    // TODO: 
-                    AddSparks();
+                    AddSparks(color);
 
                     foreach (Pipe p in pipes)
                     {
@@ -67,8 +63,7 @@ namespace Superfluid.Entities
                 // Colides with enemy -> damage
                 if(enemies.Any())
                 {
-                    // TODO: Damage enemies
-                    AddSparks();
+                    AddSparks(color);
                     
                     foreach (Enemy e in enemies)
                     {
@@ -77,11 +72,25 @@ namespace Superfluid.Entities
                     
                 }
             }
+
+            // Collides with block
+            if (blocks.Any())
+            {
+                AddSparks(color);
+            }
         }
 
         public override void Draw(Graphics gfx, float dt)
         {
-            gfx.Color = Color.Red;
+            if (IsBloodThirsty) 
+            {
+                gfx.Color = Color.Red;
+            } 
+            else
+            {
+                gfx.Color = Color.Green;
+            } 
+            
             gfx.DrawImage(Image, Transform);
         }
     }

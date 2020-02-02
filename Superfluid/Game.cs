@@ -36,6 +36,10 @@ namespace Superfluid
 
         public static Color BackgroundColor = Color.Parse("#95A5A6");
 
+        public static Image KillCursor;
+
+        public static Image HealCursor;
+
         public static Image Background;
 
         private static HashSet<Entity> _addEntities, _removeEntities;
@@ -84,7 +88,7 @@ namespace Superfluid
                 Assets.SetImagesCenterOrigin("alien", "slime"); // alienpink_walk1, etc
 
                 // Sets the cursor
-                SetCursor("crosshair102", Color.Pink);
+                SetCursor("crosshair102");
 
                 // Load the background image
                 Background = Assets.GetImage("colored_desert");
@@ -325,21 +329,32 @@ namespace Superfluid
 
         #endregion
 
-        private static void SetCursor(string name, Color color)
+        private static void SetCursor(string name)
         {
             // Clone image
             var image = Assets.GetImage(name);
-            var cursor = new Image(image.Size);
+            var kcursor = new Image(image.Size);
+            var hcursor = new Image(image.Size);
 
             // Copy pixels
-            foreach (var (x, y) in Rasterizer.Rectangle(cursor.Size))
+            foreach (var (x, y) in Rasterizer.Rectangle(kcursor.Size))
             {
-                cursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * color);
+                kcursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * Color.Red);
             }
 
-            // Center of image
-            cursor.Origin = image.Origin;
-            Window.SetCursor(cursor);
+            KillCursor = kcursor;
+            KillCursor.Origin = image.Origin;
+
+             // Copy pixels
+            foreach (var (x, y) in Rasterizer.Rectangle(hcursor.Size))
+            {
+                hcursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * Color.Green);
+            }
+
+            HealCursor = hcursor;
+            HealCursor.Origin = image.Origin;
+
+            Window.SetCursor(KillCursor);
         }
 
         public static IEnumerable<T> QuerySpatial<T>(IShape shape)

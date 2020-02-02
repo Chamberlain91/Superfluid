@@ -61,6 +61,9 @@ namespace Superfluid.Actors
             // Stop horizontal motion
             Velocity = (0, Velocity.Y);
 
+            // Gun Mode input
+            DetectGunMode();
+
             // Shooting input
             DetectShoot(dt);
 
@@ -111,11 +114,14 @@ namespace Superfluid.Actors
         {
             if (InputKill)
             {
+                // Sets the cursor
+                Game.Window.SetCursor(Game.KillCursor);
                 _killingIntent = true;
             }
 
             if (InputHeal)
             {
+                Game.Window.SetCursor(Game.HealCursor);
                 _killingIntent = false;
             }
         }
@@ -129,6 +135,9 @@ namespace Superfluid.Actors
                 GotoState(State.Idle);
             }
 
+            // Gun Mode input
+            DetectGunMode();
+
             // Shooting input
             DetectShoot(dt);
 
@@ -140,6 +149,7 @@ namespace Superfluid.Actors
         {
             WantFallDown = false;
             DetectMovement();
+            DetectGunMode();
             DetectShoot(dt);
             DetectPickUp();
         }
