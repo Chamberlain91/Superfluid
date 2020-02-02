@@ -88,6 +88,9 @@ namespace Superfluid.Engine
             // Gravity
             Velocity += Vector.Down * 0.33F;
 
+            // Velocity limit
+            if (Velocity.Y > 15) { Velocity = (Velocity.X, 15); }
+
             // Integrate vertical velocity
             Transform.Position += (0, Velocity.Y);
             ComputeBounds();
