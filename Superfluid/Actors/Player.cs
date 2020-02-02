@@ -118,14 +118,13 @@ namespace Superfluid.Actors
 
         private void DetectGunMode()
         {
-            if (InputKill)
+            if (InputKill && _killingIntent != true)
             {
-                // Sets the cursor
                 Game.Window.SetCursor(Game.KillCursor);
                 _killingIntent = true;
             }
 
-            if (InputHeal)
+            if (InputHeal && _killingIntent != false)
             {
                 Game.Window.SetCursor(Game.HealCursor);
                 _killingIntent = false;

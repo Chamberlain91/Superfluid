@@ -99,8 +99,11 @@ namespace Superfluid
                 Assets.SetImagesCenterOrigin("crosshair102", "particle");
                 Assets.SetImagesCenterOrigin("alien", "slime"); // alienpink_walk1, etc
 
-                // Sets the cursor
-                SetCursor("crosshair102");
+                // Setup the cursors
+                var cursorImage = Assets.GetImage("crosshair102");
+                HealCursor = CreateImageClone(cursorImage, Color.Green);
+                KillCursor = CreateImageClone(cursorImage, Color.Red);
+                Window.SetCursor(KillCursor); // ...
 
                 // Load the background image
                 Background = Assets.GetImage("colored_desert");
@@ -354,32 +357,19 @@ namespace Superfluid
 
         #endregion
 
-        private static void SetCursor(string name)
+        private static Image CreateImageClone(Image image, Color blend)
         {
-            // Clone image
-            var image = Assets.GetImage(name);
-            var kcursor = new Image(image.Size);
-            var hcursor = new Image(image.Size);
+            var clone = new Image(image.Size);
 
             // Copy pixels
-            foreach (var (x, y) in Rasterizer.Rectangle(kcursor.Size))
+            foreach (var (x, y) in Rasterizer.Rectangle(image.Size))
             {
-                kcursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * Color.Red);
+                clone.SetPixel(x, y, (Color) image.GetPixel(x, y) * blend);
             }
 
-            KillCursor = kcursor;
-            KillCursor.Origin = image.Origin;
-
-            // Copy pixels
-            foreach (var (x, y) in Rasterizer.Rectangle(hcursor.Size))
-            {
-                hcursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * Color.Green);
-            }
-
-            HealCursor = hcursor;
-            HealCursor.Origin = image.Origin;
-
-            Window.SetCursor(KillCursor);
+            // Copy origin
+            clone.Origin = image.Origin;
+            return clone;
         }
 
         public static IEnumerable<T> QuerySpatial<T>(IShape shape)
@@ -406,42 +396,100 @@ namespace Superfluid
 
         private static void OnUpdate(Graphics gfx, float dt)
         {
+            // Go to next stage, etc
+            ProcessStageFlow(dt);
+
+            // Update entities
+            UpdateEntities(dt);
+
+            // Draw everything
+            Draw(gfx, dt);
+        }
+
+        private static void UpdateEntities(float dt)
+        {
             // Add/Remove entities
             foreach (var e in _removeEntities) { _entities.Remove(e); }
             foreach (var e in _addEntities) { _entities.Add(e); }
             _removeEntities.Clear(); _addEntities.Clear();
-
-            // 
-            if (!Pipes.IsComplete)
-            {
-                _elapsedTime += dt;
-            }
-            else if (Input.GetKeyDown(Key.Enter))
-            {
-                StageIndex++;
-                if (StageIndex >= StageNames.Length)
-                {
-                    // TODO: remove this demo style reset
-                    _elapsedTime = 0;
-                    StageIndex = 0;
-                }
-
-                LoadMap(StageNames[StageIndex]);
-            }
 
             // Update Entities
             foreach (var entity in _entities)
             {
                 entity.Update(dt);
             }
+        }
 
-            // Draw everything
-            Draw(gfx, dt);
+        private static void ProcessStageFlow(float dt)
+        {
+            if (Pipes.IsComplete)
+            {
+                if (Input.GetKeyDown(Key.Enter))
+                {
+                    StageIndex++;
+                    if (StageIndex >= StageNames.Length)
+                    {
+                        // TODO: remove this demo style reset
+                        _elapsedTime = 0;
+                        StageIndex = 0;
+                    }
+
+                    // Load next stage
+                    LoadMap(StageNames[StageIndex]);
+                }
+            }
+            else
+            {
+                // Accumulate time only when stage is "active"
+                _elapsedTime += dt;
+            }
         }
 
         private static void Draw(Graphics gfx, float dt)
         {
-            // 
+            gfx.PushState();
+            {
+                // 
+                ComputeAndApplyCamera(gfx, dt);
+
+                // Draws the background image and frame
+                DrawBackground(gfx);
+
+                // Draws each map layer
+                var foregroundLayer = Map.GetLayer("foreground");
+                var backgroundLayer = Map.GetLayer("background");
+                var groundLayer = Map.GetLayer("ground");
+                var spawnLayer = Map.GetLayer("spawn");
+
+                // Draw background
+                backgroundLayer.Draw(gfx);
+
+                // Draw Entity Back (ie. Pipes...)
+                DrawEntities(gfx, dt, EntityLayer.Back);
+
+                // Draw spawn layer
+                spawnLayer.Draw(gfx);
+
+                // Draw ground
+                groundLayer.Draw(gfx);
+
+                // Draws Entity Front (ie, Player, Sparks...)
+                DrawEntities(gfx, dt, EntityLayer.Front);
+
+                // Draw foreground
+                foregroundLayer.Draw(gfx);
+            }
+            gfx.PopState();
+
+            // Draw HUD
+            var timeStr = Time.GetEnglishTime(_elapsedTime);
+            if (Pipes.IsComplete) { timeStr += " [Press Enter To Go Next Stage]"; }
+            DrawLabel(gfx, timeStr, (10, 10));
+        }
+
+        private static void ComputeAndApplyCamera(Graphics gfx, float dt)
+        {
+            // Animate camera smoothly to player position
             _cameraPos = Vector.Lerp(_cameraPos, Player.Bounds.Center, 5 * dt);
             _cameraPos = Vector.Round(_cameraPos);
 
@@ -450,50 +498,22 @@ namespace Superfluid
             var cameraMatrix = Matrix.CreateTranslation((IntVector) cameraCenterOffset - _cameraPos);
             ScreenToWorld = Matrix.Inverse(cameraMatrix);
             gfx.GlobalTransform = cameraMatrix;
+        }
 
-            // Draws the background image and frame
-            DrawBackground(gfx);
-
-            // Draws each map layer
-            var foregroundLayer = Map.GetLayer("foreground");
-            var backgroundLayer = Map.GetLayer("background");
-            var groundLayer = Map.GetLayer("ground");
-
-            // Draw background
-            backgroundLayer.Draw(gfx);
-
-            // Draw Entity Back (ie. Pipes...)
-            DrawEntities(gfx, dt, EntityLayer.Back);
-            // Map.GetLayer("pipes").Draw(gfx); // todo: remove when the entities exist
-
-            // Draw ground
-            groundLayer.Draw(gfx);
-
-            // Draws Entity Front (ie, Player, Sparks...)
-            DrawEntities(gfx, dt, EntityLayer.Front);
-
-            // Draw foreground
-            foregroundLayer.Draw(gfx);
-
-            // Reset camera to window space
-            gfx.GlobalTransform = Matrix.Identity;
-
-            // Draw HUD
-            var timeStr = Time.GetEnglishTime(_elapsedTime);
-            if (Pipes.IsComplete)
-            {
-                timeStr += " [Press Enter To Go Next Stage]";
-            }
-
-            var rect = TextLayout.Measure(timeStr, Font.Default, 32);
-            rect.Offset(10, 10);
+        private static void DrawLabel(Graphics gfx, string str, Vector pos)
+        {
+            // Computes bounding rectangle for label background
+            var rect = TextLayout.Measure(str, Font.Default, 32);
+            rect.Offset(pos);
             rect.Inflate(8);
 
-            gfx.Color = Color.DarkGray;
+            // Draw label background
+            gfx.Color = FlatColors.MidnightBlue;
             gfx.DrawRect(rect);
 
+            // Draw text
             gfx.Color = FlatColors.Emerald;
-            gfx.DrawText(timeStr, (10, 10), Font.Default, 32);
+            gfx.DrawText(str, pos, Font.Default, 32);
         }
 
         private static void DrawBackground(Graphics gfx)
