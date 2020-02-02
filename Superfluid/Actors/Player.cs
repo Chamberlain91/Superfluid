@@ -116,11 +116,14 @@ namespace Superfluid.Actors
         {
             if (InputKill)
             {
+                // Sets the cursor
+                Game.Window.SetCursor(Game.KillCursor);
                 _killingIntent = true;
             }
 
             if (InputHeal)
             {
+                Game.Window.SetCursor(Game.HealCursor);
                 _killingIntent = false;
             }
         }
