@@ -7,8 +7,9 @@ using Heirloom.Collections.Spatial;
 using Heirloom.Desktop;
 using Heirloom.Drawing;
 using Heirloom.Drawing.Extras;
+using Heirloom.IO;
 using Heirloom.Math;
-
+using Heirloom.Sound;
 using Superfluid.Actors;
 using Superfluid.Engine;
 using Superfluid.Entities;
@@ -30,6 +31,8 @@ namespace Superfluid
         public static Matrix ScreenToWorld;
 
         public static Color BackgroundColor = Color.Parse("#95A5A6");
+
+        public static AudioSource BackgroundMusic;
 
         private static HashSet<Entity> _addSet, _remSet;
         private static TypeDictionary<Entity> _entities;
@@ -55,6 +58,17 @@ namespace Superfluid
 
                 // Bind Input
                 Input.AttachToWindow(Window);
+
+                // Load BGM
+                BackgroundMusic = new AudioSource(Files.OpenStream("assets/music/4222-pixelland-by-kevin-macleod.mp3"));
+                BackgroundMusic.IsLooping = true;
+                BackgroundMusic.Play();
+
+                /*
+                 * Music from https://filmmusic.io
+                 * "Pixelland" by Kevin MacLeod(https://incompetech.com)
+                 * License: CC BY(http://creativecommons.org/licenses/by/4.0/)
+                 */
 
                 // Load game assets
                 Assets.LoadDatabase();

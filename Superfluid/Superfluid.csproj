@@ -516,6 +516,7 @@
     <None Remove="Assets\Images\Players\Yellow\alienYellow_walk1.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_walk2.png" />
     <None Remove="Assets\Maps\TestMap.tmx" />
+    <None Remove="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
     <None Remove="Assets\Tilesets\Industrial.tsx" />
     <None Remove="Assets\Tilesets\Pipes.tsx" />
     <None Remove="Assets\Tilesets\SuperFluidTiles.tsx" />
@@ -1011,6 +1012,7 @@
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk1.png" />
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk2.png" />
     <EmbeddedResource Include="Assets\Maps\TestMap.tmx" />
+    <EmbeddedResource Include="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
     <EmbeddedResource Include="Assets\Tilesets\Industrial.tsx" />
     <EmbeddedResource Include="Assets\Tilesets\Pipes.tsx" />
   </ItemGroup>
