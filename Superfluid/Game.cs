@@ -84,10 +84,15 @@ namespace Superfluid
             // Load map data (load phase)
             Map = Assets.GetMap(name);
 
-            var tileset = Assets.GetTileSet("industrial");
+            // Load TileSets
+            var industrialTileset = Assets.GetTileSet("industrial");
+            var pipeTileset = Assets.GetTileSet("pipes");
 
-            // Scan map data (generate phase)
+            // Load Layers
             var groundLayer = Map.GetLayer("ground");
+            var pipeLayer = Map.GetLayer("pipes");
+
+            // Scan ground layer map data (generate phase)
             foreach (var (x, y) in Rasterizer.Rectangle(Map.Size))
             {
                 var tile = groundLayer.GetTile(x, y);
@@ -100,7 +105,7 @@ namespace Superfluid
 
                     var soft = false;
 
-                    if (tile.TileSet == tileset)
+                    if (tile.TileSet == industrialTileset)
                     {
                         // 
                         if (tile.Id == 65 || tile.Id == 63 ||
@@ -124,6 +129,93 @@ namespace Superfluid
                     // 
                     Spatial.Add(block, block.Bounds);
                     Entities.Add(block);
+                }
+            }
+
+            // Scan ground layer map data (generate phase)
+            foreach (var (x, y) in Rasterizer.Rectangle(Map.Size))
+            {
+                var tile = pipeLayer.GetTile(x, y);
+                if (tile == null) 
+                { continue; }
+                else {
+                    // Compute Block Position
+                    var pos = new Vector(x, y) * (Vector) Map.TileSize;
+                    var rect = new Rectangle(pos, Map.TileSize);
+
+                    // Offsets for pipe openings
+                    var off1 = new IntVector();
+                    var off2 = new IntVector();
+                    var gotOffset = false; // don't judge me lol
+                    var gold = false;
+
+                    if (tile.TileSet == pipeTileset)
+                    {
+                        // vertical pipe
+                        if (tile.Id == 88 || tile.Id == 100 || tile.Id == 106) 
+                        {
+                            off1.Set(0, -2); // bottom 
+                            off2.Set(0, 1);  // top
+                            gotOffset = true;
+
+                            if (tile.Id == 106)
+                            {
+                                gold = true;
+                            }
+                        }
+
+                        // horizontal pipe
+                        if (tile.Id == 89 || tile.Id == 101 || tile.Id == 107)
+                        {
+                            off1.Set(-1, 0); // left
+                            off2.Set(2, 0);  // right
+                            gotOffset = true;
+
+                            if (tile.Id == 106)
+                            {
+                                gold = true;
+                            }
+                        }
+
+                        // Curved Pipes
+                        if (tile.Id == 90 || tile.Id == 102)
+                        {
+                            // Top Left to Bottom Right
+                            off1.Set(-1, -1); 
+                            off2.Set(1, 1); 
+                            gotOffset = true;
+                        }
+
+                        if (tile.Id == 91 || tile.Id == 103)
+                        {
+                            // Bottom Left to Top Right (upside down L)
+                            off1.Set(0, 1); 
+                            off2.Set(2, -1);
+                            gotOffset = true;
+                        }
+
+                        if (tile.Id == 92 || tile.Id == 104)
+                        {
+                            // Top Left to bottom Right (L)
+                            off1.Set(0, -2);
+                            off2.Set(2, 0);
+                            gotOffset = true;
+                        }
+
+                        if (tile.Id == 93 || tile.Id == 105)
+                        {
+                            // Bottom Left to Top Right (Backwards L)
+                            off1.Set(-1, 0);
+                            off2.Set(1, -2);
+                            gotOffset = true;
+                        }
+                    }
+
+                    if (gotOffset) {
+                        Pipe pipe = new Pipe(rect, off1, off2, gold);
+                        Spatial.Add(pipe, pipe.Bounds);
+                        Entities.Add(pipe);
+                    }
                 }
             }
         }
