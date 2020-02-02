@@ -5,20 +5,27 @@ using Superfluid.Engine;
 
 namespace Superfluid.Entities
 {
-
     public class Pipe : Entity, ISpatialObject
     {
+        public Image Image;
 
-        public Pipe(Rectangle bounds,  IntVector offset1, 
-                    IntVector offset2, bool isGoldPipe)
+        public Pipe(Image image, Rectangle localBounds,
+                    IntVector offset1, IntVector offset2,
+                    bool isGoldPipe)
         {
-            Bounds = bounds;
+            Image = image;
+            LocalBounds = localBounds;
             Offset1 = offset1;
             Offset2 = offset2;
-            IsGoldPipe = IsGoldPipe;
+            IsGoldPipe = isGoldPipe;
+
+            // Draw behind ground layer
+            Layer = EntityLayer.Back;
         }
 
-        public Rectangle Bounds { get; }
+        public Rectangle LocalBounds { get; }
+
+        public Rectangle Bounds { get; private set; }
 
         public IntVector Offset1 { get; }
 
@@ -28,15 +35,35 @@ namespace Superfluid.Entities
 
         public override void Update(float dt)
         {
-            // nothing (for now)
+            // nada
+        }
+
+        public void ComputeWorldBounds()
+        {
+            // Computes world bounds
+            var bounds = LocalBounds;
+            bounds.Position += Transform.Position;
+            Bounds = bounds;
         }
 
         public override void Draw(Graphics gfx, float dt)
         {
+            gfx.DrawImage(Image, Transform);
+        }
+
+        public override void DebugDraw(Graphics gfx)
+        {
+            gfx.Color = Color.Black;
             gfx.DrawRectOutline(Bounds);
-            gfx.DrawCross(Bounds.Position + (Offset1 * 70) + (35, 35), 35, 8);
-            gfx.Color.Equals(Color.Magenta);
-            gfx.DrawCross(Bounds.Position + (Offset2 * 70) + (35, 35), 35, 8);
+
+            gfx.Color = Color.Pink;
+            var a = Transform.Position + (Offset1 * 70) + (35, 35);
+            var b = Transform.Position + (Offset2 * 70) + (35, 35);
+            gfx.DrawCross(a, 24, 4);
+            gfx.DrawCross(b, 24, 4);
+
+            gfx.Color = Color.Orange;
+            gfx.DrawLine(a, b, 2);
         }
     }
 }
