@@ -52,6 +52,11 @@ namespace Superfluid.Entities
             {
                 // TODO: 
                 AddSparks();
+
+                foreach (Pipe p in pipes)
+                {
+                    p.HealDamage();
+                }
             }
 
             // Colides with enemy -> damage

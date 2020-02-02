@@ -12,6 +12,10 @@ namespace Superfluid.Entities
     {
         public Image Image;
 
+        private const float _maxHealth = 100;
+
+        private float _currHealth = _maxHealth - 10;
+
         public Pipe(Image image, Rectangle localBounds, IEnumerable<Vector> localOffsets, bool isGoldPipe)
         {
             Image = image;
@@ -45,6 +49,30 @@ namespace Superfluid.Entities
         public override void Update(float dt)
         {
             // nada
+        }
+
+        // Called when enemies hit it
+        public void TakeDamage(float damage) {
+            if (_currHealth > 0)
+            {
+                _currHealth -= damage;
+            } 
+            else if (_currHealth < 0 )
+            {
+                _currHealth = 0;
+            }
+        }
+
+        public void HealDamage() {
+            if (_currHealth < _maxHealth)
+            {
+                _currHealth += 5;
+                Log.Info("Pipe Health = " + _currHealth);
+            } 
+            else if (_currHealth > _maxHealth)
+            {
+                _currHealth = _maxHealth;
+            }
         }
 
         public void ComputeWorldSpace()
