@@ -85,12 +85,6 @@ namespace Superfluid
                 Music.IsLooping = true;
                 Music.Play();
 
-                /*
-                 * Music from https://filmmusic.io
-                 * "Pixelland" by Kevin MacLeod(https://incompetech.com)
-                 * License: CC BY(http://creativecommons.org/licenses/by/4.0/)
-                 */
-
                 // Load game assets
                 Assets.LoadDatabase();
                 Assets.PackAtlas();
@@ -496,6 +490,10 @@ namespace Superfluid
             var timeStr = Time.GetEnglishTime(_elapsedTime);
             if (Pipes.IsComplete) { timeStr += " [Press Enter To Go Next Stage]"; }
             DrawLabel(gfx, timeStr, (10, 10));
+
+            gfx.Color = Color.Black;
+            var credit = "Music is \"Pixelland\" by Kevin MacLeod (https://incompetech.com)";
+            gfx.DrawText(credit, (gfx.Surface.Width - 10, gfx.Surface.Height - 20), Font.Default, 16, TextAlign.Right);
         }
 
         private static void ComputeAndApplyCamera(Graphics gfx, float dt)

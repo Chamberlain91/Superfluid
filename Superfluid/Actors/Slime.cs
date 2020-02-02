@@ -18,6 +18,8 @@ namespace Superfluid.Actors
         private Range _flipTimeRange = new Range(4, 8);
         private float _flipTime;
 
+        private float _wantFallTime;
+
         public Slime()
             : base(_sprite, maxHealth: 100)
         {
@@ -73,7 +75,7 @@ namespace Superfluid.Actors
         {
             Velocity = (0, Velocity.Y);
 
-            var pipes = Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0);
+            var pipes = Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0 && !p.IsGoldPipe);
 
             // Not near a pipe
             if (!pipes.Any()) { GotoState(State.Walk); }
@@ -86,26 +88,44 @@ namespace Superfluid.Actors
 
         private void RandomizerUpdate(float dt)
         {
-            _jumpTime -= dt;
-            _flipTime -= dt;
-
-            // Jump timer
-            if (_jumpTime < 0)
+            if (_wantFallTime > 0)
             {
-                _jumpTime = _jumpTimeRange.Random;
-
-                var xvel = Facing == FaceDirection.Right ? 4 : -4;
-                Velocity = (Velocity.X + xvel, -11);
-                GotoState(State.Jump);
+                _wantFallTime -= dt;
+                WantFallDown = true;
             }
-
-            // Flip timer
-            if (_flipTime < 0)
+            else
             {
-                _flipTime = _flipTimeRange.Random;
+                _jumpTime -= dt;
+                _flipTime -= dt;
 
-                // Flip direction
-                FlipFacing();
+                WantFallDown = false;
+
+                // Jump timer
+                if (_jumpTime < 0)
+                {
+                    _jumpTime = _jumpTimeRange.Random;
+
+                    if (Calc.Random.Chance(0.5F))
+                    {
+                        // Fall
+                        _wantFallTime = 0.5F;
+                    }
+                    else
+                    {
+                        var xvel = Facing == FaceDirection.Right ? 4 : -4;
+                        Velocity = (Velocity.X + xvel, -13);
+                        GotoState(State.Jump);
+                    }
+                }
+
+                // Flip timer
+                if (_flipTime < 0)
+                {
+                    _flipTime = _flipTimeRange.Random;
+
+                    // Flip direction
+                    FlipFacing();
+                }
             }
         }
 
