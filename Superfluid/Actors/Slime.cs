@@ -47,7 +47,7 @@ namespace Superfluid.Actors
             else { Velocity = (+1, Velocity.Y); }
 
             // Near/Touching a pipe
-            if (Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0).Any())
+            if (Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0 && !p.IsGoldPipe).Any())
             {
                 GotoState(State.Idle);
             }
