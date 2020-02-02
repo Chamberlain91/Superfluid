@@ -53,8 +53,10 @@ namespace Superfluid
         public static int StageIndex;
         public static string[] StageNames =
         {
-            "stage1",
-            "stage3"
+            "stage1", // intro
+            "stage2", // more
+            "stage3", // tall
+            // "stage4", // eileen be mean
         };
 
         private static void Main(string[] args)
@@ -242,7 +244,7 @@ namespace Superfluid
 
                 // One way thin
                 if (tile.Id == 64 || tile.Id == 62 ||
-                    tile.Id == 34 || tile.Id == 35 || tile.Id == 37)
+                    tile.Id == 34 || tile.Id == 35 || tile.Id == 36)
                 {
                     bounds.Height = 20;
                     isOneWay = true;
@@ -539,8 +541,18 @@ namespace Superfluid
             gfx.PushState();
             {
                 // Draw background (skybox)
-                var backgroundRatio = stageWidth / (float) Background.Width;
-                gfx.DrawImage(Background, Matrix.CreateScale(backgroundRatio));
+                var stageAspect = stageWidth / (float) stageHeight;
+
+                // Computes a paralax...?
+                var ox = _cameraPos.X / stageWidth;
+                var oy = _cameraPos.Y / stageHeight;
+                var backgroundOffset = new Vector(ox, oy) * 60 - (30, 30);
+
+                float backgroundScaling;
+                if (stageAspect > 1) { backgroundScaling = stageWidth / (float) Background.Width; }
+                else { backgroundScaling = stageHeight / (float) Background.Height; }
+
+                gfx.DrawImage(Background, Matrix.CreateTransform(backgroundOffset, 0, backgroundScaling));
 
                 // Draw background (frame)
                 gfx.Color = BackgroundColor;
