@@ -11,8 +11,6 @@ namespace Superfluid.Actors
 {
     public class Player : Actor
     {
-        
-
         public const float WalkSpeed = 4;
 
         public const float ShootRate = 0.33F;
@@ -44,10 +42,10 @@ namespace Superfluid.Actors
 
         public bool InputGrab => Input.GetMouseDown(1);
 
-        private bool _hasGrab = true;
+        private bool _canGrab = true;
 
         // used to hold pipe when "picked up"
-        public Pipe Pocket = null;  
+        public Pipe Pocket = null;
 
         protected override void IdleUpdate(float dt)
         {
@@ -93,22 +91,22 @@ namespace Superfluid.Actors
             }
         }
 
-        private void DetectPickUp() 
+        private void DetectPickUp()
         {
-            if (InputGrab && _hasGrab) 
+            // Pressing grab and can grab
+            if (InputGrab && _canGrab)
             {
-                _hasGrab = false;
                 // TODO: Check if grabbing pipe
                 var mouseWorld = Game.ScreenToWorld * Input.MousePosition;
-                if (!Game.Pipes.Pickup(mouseWorld, ref Pocket))
-                {
-                    Log.Info("HECK YES");
-                }  
-            } 
-            else if (!InputGrab) 
+                var grabSuccess = Game.Pipes.Pickup(mouseWorld, ref Pocket);
+                Log.Warn($"Grab: {grabSuccess}");
+                _canGrab = false;
+            }
+            // Not pressing grab
+            else if (!InputGrab)
             {
-                // TODO: 
-                _hasGrab = true;
+                // Allow grabbing again 
+                _canGrab = true;
             }
         }
 
@@ -225,6 +223,20 @@ namespace Superfluid.Actors
             if (dir > 0 && CurrentState == State.Jump)
             {
                 GotoState(State.Idle);
+            }
+        }
+
+        public override void Draw(Graphics gfx, float dt)
+        {
+            base.Draw(gfx, dt);
+
+            // 
+            if (Pocket != null)
+            {
+                var gridMouse = Input.GetGridMousePosition();
+
+                gfx.Color = new Color(0, 0, 0, 0.1F);
+                gfx.DrawImage(Pocket.Image, Matrix.CreateTranslation(gridMouse));
             }
         }
 

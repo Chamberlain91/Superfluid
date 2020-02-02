@@ -188,7 +188,7 @@ namespace Superfluid
             }
 
             // Detect initial pipe configuration
-            Pipes.DetectPipeConnections();
+            Pipes.EvaluatePipeConfiguration();
         }
 
         private static void LoadMapProcessGroundTiles(int x, int y, Tile tile)
@@ -267,6 +267,7 @@ namespace Superfluid
 
                 // Is this a gold (input/output) pipe?
                 var isGoldPipe = HG || VG;
+                var isGreyPipe = !isGoldPipe && (tile.Id > 99); // THIS IS BAD BUT FUNCTIONAL
 
                 // == Corner Pipes
 
@@ -317,7 +318,7 @@ namespace Superfluid
                 var points = new[] { offset1, offset2 }.Select(s => (35, 35) + (s * 70));
 
                 // Generate pipe
-                var pipe = AddEntity(new Pipe(tile.Image, bounds, points, isGoldPipe));
+                var pipe = AddEntity(new Pipe(tile.Image, bounds, points, isGreyPipe, isGoldPipe));
                 pipe.Transform.Position = position;
                 pipe.ComputeWorldSpace();
 

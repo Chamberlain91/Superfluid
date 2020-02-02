@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using Heirloom.Math;
 
+using Superfluid.Engine;
 using Superfluid.Entities;
 
 namespace Superfluid
@@ -25,15 +27,31 @@ namespace Superfluid
             _pipes.Remove(pipe);
         }
 
+        public void EvaluatePipeConfiguration()
+        {
+            // 
+            DetectPipeConnections();
+
+            // 
+            if (CheckCompleteConnection(out var pipes))
+            {
+                foreach (var pipe in pipes)
+                {
+                    pipe.IsFunctional = true;
+                }
+            }
+        }
+
         /// <summary>
         /// Evaluates the pipes to update their connections with each other.
         /// </summary>
-        public void DetectPipeConnections()
+        private void DetectPipeConnections()
         {
             // Reset previously known connections
             foreach (var pipe in _pipes)
             {
                 pipe.Connections.Clear();
+                pipe.IsFunctional = false;
             }
 
             // For each pipe
@@ -57,6 +75,11 @@ namespace Superfluid
 
             static bool CheckConnection(Pipe source, Pipe target)
             {
+                // Broken pipes, no good
+                if (source.Health < 1) { return false; }
+                if (target.Health < 1) { return false; }
+
+                // 
                 foreach (var connectionPoint in source.GetValidConnectionPoints())
                 {
                     if (target.Bounds.ContainsPoint(connectionPoint))
@@ -72,7 +95,7 @@ namespace Superfluid
         /// <summary>
         /// Checks if the golden pipes can see each other (thus a completed connection).
         /// </summary>
-        public bool CheckCompleteConnection()
+        private bool CheckCompleteConnection(out IEnumerable<Pipe> pipes)
         {
             var gold = _pipes.First(p => p.IsGoldPipe);
 
@@ -90,6 +113,7 @@ namespace Superfluid
                 if (pipe.IsGoldPipe && pipe != gold)
                 {
                     // gold can see gold
+                    pipes = visited;
                     return true;
                 }
                 else
@@ -108,6 +132,7 @@ namespace Superfluid
             }
 
             // Was not able to see another golden pipe
+            pipes = null;
             return false;
         }
 
@@ -118,14 +143,40 @@ namespace Superfluid
             // Both locations are empty, can't do anything
             if (fieldPipe == null && pocketPipe == null) { return false; }
 
-            // todo: check exchange is valid
-            // todo: remove pipe from spatial/structure
-            // todo: exchange pipes (assign to ref)
-            // todo: add pipe to spatial/structure
+            // Field was not null (pickup)
+            if (fieldPipe != null)
+            {
+                // Pocket is full, unable to pick up
+                if (pocketPipe != null) { return false; }
 
-            // false negative, just to compile
-            // todo: implement for real
-            return false;
+                // Can't swap grey or gold pipes
+                if (fieldPipe.IsGreyPipe) { return false; }
+                if (fieldPipe.IsGoldPipe) { return false; }
+
+                // Remove it from the stage
+                Game.Spatial.Remove(fieldPipe);
+                Game.RemoveEntity(fieldPipe);
+            }
+
+            // Swap...
+            Calc.Swap(ref fieldPipe, ref pocketPipe);
+
+            // Field can be null on pickup vs deposit
+            if (fieldPipe != null)
+            {
+                // Position and update world information
+                fieldPipe.Transform.Position = Input.GetGridMousePosition();
+                fieldPipe.ComputeWorldSpace();
+
+                // Insert into stage
+                Game.Spatial.Add(fieldPipe, fieldPipe.Bounds);
+                Game.AddEntity(fieldPipe);
+            }
+
+            EvaluatePipeConfiguration();
+
+            // Pickup complete
+            return true;
         }
     }
 }
