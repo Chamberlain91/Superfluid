@@ -76,7 +76,7 @@ namespace Superfluid
 
                 // Center origins on assets prefixed by string given
                 Assets.SetImagesCenterOrigin("crosshair102", "particle");
-                Assets.SetImagesCenterOrigin("alien"); // alienpink_walk1, etc
+                Assets.SetImagesCenterOrigin("alien", "slime"); // alienpink_walk1, etc
 
                 // Sets the cursor
                 SetCursor("crosshair102", Color.Pink);
@@ -90,6 +90,10 @@ namespace Superfluid
                 // Create the player actor
                 var player = AddEntity(new Player());
                 player.Transform.Position = (200, 300);
+
+                // Create a test slime
+                var slime = AddEntity(new Slime());
+                slime.Transform.Position = (800, 300);
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);

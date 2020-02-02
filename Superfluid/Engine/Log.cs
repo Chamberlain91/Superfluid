@@ -27,7 +27,6 @@ namespace Superfluid.Engine
             Console.ResetColor();
         }
 
-        [Conditional("DEBUG")]
         public static void Info(object message)
         {
             Console.WriteLine(message);

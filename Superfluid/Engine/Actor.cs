@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+
 using Heirloom.Drawing;
 using Heirloom.Math;
+
 using Superfluid.Entities;
+
 using Range = Heirloom.Math.Range;
 
 namespace Superfluid.Engine
@@ -16,6 +17,8 @@ namespace Superfluid.Engine
         private Rectangle _bounds;
 
         private readonly StateMachine<State> _stateMachine = new StateMachine<State>();
+
+        protected FaceDirection SpriteNeutralFacing = FaceDirection.Right;
 
         protected FaceDirection Facing;
 
@@ -230,7 +233,7 @@ namespace Superfluid.Engine
         {
             // Compute flip matrix
             var flipMatrix = Matrix.Identity;
-            if (Facing == FaceDirection.Left)
+            if (Facing != SpriteNeutralFacing)
             {
                 flipMatrix = Matrix.CreateScale(-1, 1);
             }
