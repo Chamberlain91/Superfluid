@@ -36,7 +36,12 @@ namespace Superfluid.Actors
 
         public bool InputShoot => Input.GetMouseDown(0);
 
-        public bool HasGrab => Input.GetMouseDown(1);
+        public bool InputGrab => Input.GetMouseDown(1);
+
+        private bool _hasGrab = true;
+
+        // used to hold pipe when "picked up"
+        public Pipe Pocket = null;  
 
         protected override void IdleUpdate(float dt)
         {
@@ -54,6 +59,9 @@ namespace Superfluid.Actors
 
             // Shooting input
             DetectShoot(dt);
+
+            // Pickup input
+            DetectPickUp();
         }
 
         private void DetectShoot(float dt)
@@ -78,7 +86,18 @@ namespace Superfluid.Actors
 
         private void DetectPickUp() 
         {
-            // TODO: UwU
+            if (InputGrab && _hasGrab) 
+            {
+                _hasGrab = false;
+                // TODO: Check if grabbing pipe
+                var mouseWorld = Game.ScreenToWorld * Input.MousePosition;
+                //Game.Pipes.Pickup(mouseworld, ref Pocket);  
+            } 
+            else if (!InputGrab) 
+            {
+                // TODO: 
+                _hasGrab = true;
+            }
         }
 
         protected override void WalkUpdate(float dt)
@@ -92,6 +111,9 @@ namespace Superfluid.Actors
 
             // Shooting input
             DetectShoot(dt);
+
+            // Pickup input 
+            DetectPickUp();
         }
 
         protected override void JumpUpdate(float dt)
@@ -99,6 +121,7 @@ namespace Superfluid.Actors
             WantFallDown = false;
             DetectMovement();
             DetectShoot(dt);
+            DetectPickUp();
         }
 
         protected override void HurtUpdate(float dt)

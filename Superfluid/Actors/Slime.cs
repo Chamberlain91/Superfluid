@@ -8,9 +8,10 @@ namespace Superfluid.Actors
     public class Slime : Enemy
     {
         private static readonly Sprite _sprite = CreateSprite();
+        private const float _maxHealth = 100f;
 
         public Slime()
-            : base(_sprite)
+            : base(_sprite, _maxHealth)
         {
             // Shrink bounds a little
             LocalBounds = Rectangle.Inflate(LocalBounds, -4);
@@ -31,11 +32,6 @@ namespace Superfluid.Actors
             };
 
             return builder.CreateSprite();
-        }
-
-        protected override void HurtUpdate(float dt)
-        {
-            // nada
         }
 
         protected override void JumpUpdate(float dt)
