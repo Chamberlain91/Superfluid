@@ -121,152 +121,154 @@ namespace Superfluid
             // Load map data (load phase)
             Map = Assets.GetMap(name);
 
-            // Load TileSets
-            var industrialTileset = Assets.GetTileSet("industrial");
-            var pipeTileset = Assets.GetTileSet("pipes");
-
-            // Load Layers
+            // Get Layers
             var groundLayer = Map.GetLayer("ground");
             var pipeLayer = Map.GetLayer("pipes");
 
-            // Scan ground layer map data (generate phase)
+            // Scan map data (generate phase)
             foreach (var (x, y) in Rasterizer.Rectangle(Map.Size))
             {
-                var tile = groundLayer.GetTile(x, y);
-                if (tile == null) { continue; }
-                else
+                var groundTile = groundLayer.GetTile(x, y);
+                if (groundTile != null)
                 {
-                    // Compute block position
-                    var pos = new Vector(x, y) * (Vector) Map.TileSize;
-                    var rec = new Rectangle(pos, Map.TileSize);
+                    LoadMapProcessGroundTiles(x, y, groundTile);
+                }
 
-                    var isOneWay = false;
+                var pipeTile = pipeLayer.GetTile(x, y);
+                if (pipeTile != null)
+                {
+                    LoadMapProcessPipesTiles(x, y, pipeTile);
+                }
+            }
+        }
 
-                    if (tile.TileSet == industrialTileset)
-                    {
-                        // 
-                        if (tile.Id == 65 || tile.Id == 63 ||
-                            tile.Id == 48 || tile.Id == 49 || tile.Id == 50)
-                        {
-                            rec.Height = 30;
-                            isOneWay = true;
-                        }
+        private static void LoadMapProcessGroundTiles(int x, int y, Tile tile)
+        {
+            // Compute block position
+            var position = new Vector(x, y) * (Vector) Map.TileSize;
+            position.Y += Map.TileSize.Height - tile.Image.Height; // weird tiled offset thing
 
-                        // 
-                        if (tile.Id == 64 || tile.Id == 62 ||
-                            tile.Id == 34 || tile.Id == 35 || tile.Id == 37)
-                        {
-                            rec.Height = 20;
-                            isOneWay = true;
-                        }
-                    }
+            var bounds = new Rectangle(position, Map.TileSize);
 
-                    var block = AddEntity(new Block(rec, isOneWay));
-                    Spatial.Add(block, block.Bounds);
+            var isOneWay = false;
+
+            // Is this tile a industrial tile?
+            if (tile.TileSet == Assets.GetTileSet("industrial"))
+            {
+                // One way thick
+                if (tile.Id == 65 || tile.Id == 63 ||
+                    tile.Id == 48 || tile.Id == 49 || tile.Id == 50)
+                {
+                    bounds.Height = 30;
+                    isOneWay = true;
+                }
+
+                // One way thin
+                if (tile.Id == 64 || tile.Id == 62 ||
+                    tile.Id == 34 || tile.Id == 35 || tile.Id == 37)
+                {
+                    bounds.Height = 20;
+                    isOneWay = true;
                 }
             }
 
-            // Scan ground layer map data (generate phase)
-            foreach (var (x, y) in Rasterizer.Rectangle(Map.Size))
+            // Generate block
+            var block = AddEntity(new Block(bounds, isOneWay));
+            Spatial.Add(block, block.Bounds);
+        }
+
+        private static void LoadMapProcessPipesTiles(int x, int y, Tile tile)
+        {
+            // Is this a pipes tile?
+            if (tile.TileSet == Assets.GetTileSet("pipes"))
             {
-                var tile = pipeLayer.GetTile(x, y);
-                if (tile == null) { continue; }
-                else
+                // Offsets for pipe openings
+                var offset1 = new IntVector();
+                var offset2 = new IntVector();
+
+                var bounds = new Rectangle(Vector.Zero, Map.TileSize);
+
+                // == Straight Pipes
+
+                var VP = tile.Id == 88 || tile.Id == 100;
+                var VG = tile.Id == 106; // vertical gold
+
+                var HP = tile.Id == 89 || tile.Id == 101;
+                var HG = tile.Id == 107; // horizontal gold
+
+                // Vertical pipe
+                if (VP || VG)
                 {
-                    // Offsets for pipe openings
-                    var off1 = new IntVector();
-                    var off2 = new IntVector();
+                    offset1.Set(0, -1);
+                    offset2.Set(0, +2);
 
-                    var rect = new Rectangle(Vector.Zero, Map.TileSize);
-
-                    // Is this a pipes tile?
-                    if (tile.TileSet == pipeTileset)
-                    {
-                        // == Straight Pipes
-
-                        var VP = tile.Id == 88 || tile.Id == 100;
-                        var VG = tile.Id == 106; // vertical gold
-
-                        var HP = tile.Id == 89 || tile.Id == 101;
-                        var HG = tile.Id == 107; // horizontal gold
-
-                        // Vertical pipe
-                        if (VP || VG)
-                        {
-                            off1.Set(0, -1);
-                            off2.Set(0, +2);
-
-                            // vertical pipes are 1x2
-                            rect.Size = (Size) ((Vector) rect.Size * (1, 2));
-                        }
-
-                        // Horizontal pipe
-                        if (HP || HG)
-                        {
-                            off1.Set(-1, 0);
-                            off2.Set(+2, 0);
-
-                            // vertical pipes are 1x2
-                            rect.Size = (Size) ((Vector) rect.Size * (2, 1));
-                        }
-
-                        // Is this a gold (input/output) pipe?
-                        var isGoldPipe = HG || VG;
-
-                        // == Corner Pipes
-
-                        var TR = tile.Id == 90 || tile.Id == 102;
-                        var TL = tile.Id == 91 || tile.Id == 103;
-                        var BL = tile.Id == 92 || tile.Id == 104;
-                        var BR = tile.Id == 93 || tile.Id == 105;
-
-                        if (TR)
-                        {
-                            // Corner elbow is top-right
-                            off1.Set(-1, 0);
-                            off2.Set(+1, 2);
-                        }
-
-                        if (TL)
-                        {
-                            // Corner elbow is top-left
-                            off1.Set(0, 2);
-                            off2.Set(2, 0);
-                        }
-
-                        if (BL)
-                        {
-                            // Corner elbow is bottom-left
-                            off1.Set(0, -1);
-                            off2.Set(2, +1);
-                        }
-
-                        if (BR)
-                        {
-                            // Corner elbow is bottom-right
-                            off1.Set(-1, +1);
-                            off2.Set(+1, -1);
-                        }
-
-                        // Corner pipes are 2x2
-                        if (TR || TL || BL || BR)
-                        {
-                            rect.Size *= 2;
-                        }
-
-                        // Compute Block Position
-                        var pos = new Vector(x, y) * (Vector) Map.TileSize;
-                        pos.Y += Map.TileSize.Height - tile.Image.Height; // weird tiled offset thing
-
-                        // Create and add pipe entity
-                        var pipe = AddEntity(new Pipe(tile.Image, rect, off1, off2, isGoldPipe));
-                        pipe.Transform.Position = pos;
-
-                        // Insert pipe into spatial structure
-                        pipe.ComputeWorldBounds();
-                        Spatial.Add(pipe, pipe.Bounds);
-                    }
+                    // vertical pipes are 1x2
+                    bounds.Size = (Size) ((Vector) bounds.Size * (1, 2));
                 }
+
+                // Horizontal pipe
+                if (HP || HG)
+                {
+                    offset1.Set(-1, 0);
+                    offset2.Set(+2, 0);
+
+                    // vertical pipes are 1x2
+                    bounds.Size = (Size) ((Vector) bounds.Size * (2, 1));
+                }
+
+                // Is this a gold (input/output) pipe?
+                var isGoldPipe = HG || VG;
+
+                // == Corner Pipes
+
+                var TR = tile.Id == 90 || tile.Id == 102;
+                var TL = tile.Id == 91 || tile.Id == 103;
+                var BL = tile.Id == 92 || tile.Id == 104;
+                var BR = tile.Id == 93 || tile.Id == 105;
+
+                if (TR)
+                {
+                    // Corner elbow is top-right
+                    offset1.Set(-1, 0);
+                    offset2.Set(+1, 2);
+                }
+
+                if (TL)
+                {
+                    // Corner elbow is top-left
+                    offset1.Set(0, 2);
+                    offset2.Set(2, 0);
+                }
+
+                if (BL)
+                {
+                    // Corner elbow is bottom-left
+                    offset1.Set(0, -1);
+                    offset2.Set(2, +1);
+                }
+
+                if (BR)
+                {
+                    // Corner elbow is bottom-right
+                    offset1.Set(-1, +1);
+                    offset2.Set(+1, -1);
+                }
+
+                // Corner pipes are 2x2
+                if (TR || TL || BL || BR)
+                {
+                    bounds.Size *= 2;
+                }
+
+                // Compute Block Position
+                var position = new Vector(x, y) * (Vector) Map.TileSize;
+                position.Y += Map.TileSize.Height - tile.Image.Height; // weird tiled offset thing
+
+                // Generate pipe
+                var pipe = AddEntity(new Pipe(tile.Image, bounds, offset1, offset2, isGoldPipe));
+                pipe.Transform.Position = position;
+                pipe.ComputeWorldBounds();
+                Spatial.Add(pipe, pipe.Bounds);
             }
         }
 
