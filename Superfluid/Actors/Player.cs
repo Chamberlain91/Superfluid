@@ -91,7 +91,7 @@ namespace Superfluid.Actors
                 _hasGrab = false;
                 // TODO: Check if grabbing pipe
                 var mouseWorld = Game.ScreenToWorld * Input.MousePosition;
-                //Game.Pipes.Pickup(mouseworld, ref Pocket);  
+                Game.Pipes.Pickup(mouseWorld, ref Pocket);  
             } 
             else if (!InputGrab) 
             {

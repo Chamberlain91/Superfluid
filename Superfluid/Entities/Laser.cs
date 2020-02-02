@@ -62,7 +62,7 @@ namespace Superfluid.Entities
                 
                 foreach (Enemy e in enemies)
                 {
-                    e.TakeDamage(50);
+                    e.TakeDamage(34);
                 }
                 
             }

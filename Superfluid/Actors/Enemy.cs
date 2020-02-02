@@ -23,6 +23,10 @@ namespace Superfluid.Actors
         {
             CurrHealth -= damage;
             _damageTaken = true;
+            if (CurrHealth <= 0)
+                {
+                    Game.RemoveEntity(this);
+                }
         }
 
         protected override void HurtUpdate(float dt) 
@@ -33,7 +37,7 @@ namespace Superfluid.Actors
                 {
                     // TODO: some death animation
                     
-                    Game.RemoveEntity(this);
+                    
                 }
 
                 else 
