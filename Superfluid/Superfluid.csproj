@@ -194,6 +194,9 @@
     <None Remove="Assets\Images\Enemies\worm_dead.png" />
     <None Remove="Assets\Images\Enemies\worm_hit.png" />
     <None Remove="Assets\Images\Enemies\worm_walk.png" />
+    <None Remove="Assets\Images\hud_heartEmpty.png" />
+    <None Remove="Assets\Images\hud_heartFull.png" />
+    <None Remove="Assets\Images\hud_heartHalf.png" />
     <None Remove="Assets\Images\Industrial\platformIndustrial_001.png" />
     <None Remove="Assets\Images\Industrial\platformIndustrial_002.png" />
     <None Remove="Assets\Images\Industrial\platformIndustrial_003.png" />
@@ -714,6 +717,9 @@
     <EmbeddedResource Include="Assets\Images\Enemies\worm_dead.png" />
     <EmbeddedResource Include="Assets\Images\Enemies\worm_hit.png" />
     <EmbeddedResource Include="Assets\Images\Enemies\worm_walk.png" />
+    <EmbeddedResource Include="Assets\Images\hud_heartEmpty.png" />
+    <EmbeddedResource Include="Assets\Images\hud_heartFull.png" />
+    <EmbeddedResource Include="Assets\Images\hud_heartHalf.png" />
     <EmbeddedResource Include="Assets\Images\Industrial\platformIndustrial_001.png" />
     <EmbeddedResource Include="Assets\Images\Industrial\platformIndustrial_002.png" />
     <EmbeddedResource Include="Assets\Images\Industrial\platformIndustrial_003.png" />

@@ -13,6 +13,8 @@ namespace Superfluid.Entities
         public Image Image;
 
         private const float MaxHealth = 100;
+        
+        private const int MaxHearts = 3;
 
         public Pipe(Image image, Rectangle localBounds, IEnumerable<Vector> localOffsets, bool isGreyPipe, bool isGoldPipe)
         {
@@ -50,6 +52,10 @@ namespace Superfluid.Entities
         public HashSet<Pipe> Connections { get; }
 
         public float Health { get; private set; } = MaxHealth;
+
+        private static Image _heartEmpty = Assets.GetImage("hud_heartempty");
+        private static Image _heartHalf = Assets.GetImage("hud_hearthalf");
+        private static Image _heartFull = Assets.GetImage("hud_heartfull");
 
         public override void Update(float dt)
         {
@@ -128,8 +134,24 @@ namespace Superfluid.Entities
             // Draw damage
             if (Health < MaxHealth)
             {
-                gfx.Color = FlatColors.Alizarin;
-                gfx.DrawText($"{Health}", Bounds.Center - (0, 32), Font.Default, 64, TextAlign.Center);
+                var hearts = Calc.Ceil(Health / MaxHealth * MaxHearts * 2) / 2F;
+
+                var scale = new Vector(0.6F, 0.6F);
+                var w = (_heartEmpty.Width / 2) + 8;
+                var h = _heartEmpty.Height / 4;
+
+                // 
+                for (var i = 0; i < MaxHearts; i++)
+                {
+                    var pos = Bounds.Center + ((i * w) - w * MaxHearts / 2, -h);
+
+                    // Full Heart
+                    if (i < Calc.Floor(hearts)) { gfx.DrawImage(_heartFull, pos, 0, scale); }
+                    // Half Heart
+                    else if (i < Calc.Ceil(hearts)) { gfx.DrawImage(_heartHalf, pos, 0, scale); }
+                    // Empty Heart
+                    else { gfx.DrawImage(_heartEmpty, pos, 0, scale); }
+                }
             }
         }
 

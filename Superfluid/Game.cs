@@ -77,7 +77,7 @@ namespace Superfluid
 
                 // Create the game window
                 Window = new Window("Superfluid!");
-                // Window.Graphics.EnableFPSOverlay = true;
+                Window.Graphics.EnableFPSOverlay = true;
                 Window.Maximize();
 
                 // Bind Input
@@ -150,7 +150,7 @@ namespace Superfluid
                 if (imageName.EndsWith("_crop.png")
                     || imageName.StartsWith("slime_") || imageName == "slime"
                     || imageName == "particlewhite_4" || imageName == "particlewhite_2"
-                    || imageName == "colored_desert")
+                    || imageName == "colored_desert" || imageName.StartsWith("hud_h"))
                 {
                     atlas.Add(Assets.GetImage(imageName));
                 }
