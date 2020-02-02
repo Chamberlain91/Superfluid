@@ -35,7 +35,7 @@ namespace Superfluid.Engine
         {
             for (var y = 0; y < Map.Height; y++)
             {
-                for (var x = 0; x < Map.Height; x++)
+                for (var x = 0; x < Map.Width; x++)
                 {
                     var tile = GetTile(x, y);
                     if (tile == null) { continue; }

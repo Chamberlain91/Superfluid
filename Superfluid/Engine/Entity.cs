@@ -8,7 +8,7 @@ namespace Superfluid.Engine
     {
         public Transform Transform { get; }
 
-        public EntityLayer Layer { get; set; }
+        public EntityLayer Layer { get; set; } = EntityLayer.Front;
 
         protected Entity()
         {

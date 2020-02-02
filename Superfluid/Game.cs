@@ -94,7 +94,7 @@ namespace Superfluid
                 Background = Assets.GetImage("colored_desert");
 
                 // Load the test map
-                LoadMap("testmap");
+                LoadMap("allpipes");
 
                 // Create the player actor
                 var player = AddEntity(new Player());
@@ -345,7 +345,7 @@ namespace Superfluid
             KillCursor = kcursor;
             KillCursor.Origin = image.Origin;
 
-             // Copy pixels
+            // Copy pixels
             foreach (var (x, y) in Rasterizer.Rectangle(hcursor.Size))
             {
                 hcursor.SetPixel(x, y, (Color) image.GetPixel(x, y) * Color.Green);
@@ -440,7 +440,7 @@ namespace Superfluid
             gfx.PushState();
             {
                 // Draw background (skybox)
-                var backgroundRatio = Background.Width / (float) stageWidth;
+                var backgroundRatio = stageWidth / (float) Background.Width;
                 gfx.DrawImage(Background, Matrix.CreateScale(backgroundRatio));
 
                 // Draw background (frame)
