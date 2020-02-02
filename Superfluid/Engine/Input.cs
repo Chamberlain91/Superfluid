@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Heirloom.Desktop;
 using Heirloom.Math;
@@ -50,6 +51,15 @@ namespace Superfluid.Engine
             }
 
             return false;
+        }
+
+        public static Vector GetGridMousePosition()
+        {
+            var mouseWorld = Game.ScreenToWorld * Input.MousePosition;
+            var mx = Calc.Floor(mouseWorld.X / Game.Map.TileSize.Width) * Game.Map.TileSize.Width;
+            var my = Calc.Floor(mouseWorld.Y / Game.Map.TileSize.Height) * Game.Map.TileSize.Height;
+            var gp = new Vector(mx, my);
+            return gp;
         }
 
         private static void Window_MouseMove(Window _, MouseMoveEvent e)

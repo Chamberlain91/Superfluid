@@ -14,7 +14,7 @@ namespace Superfluid.Entities
 
         private const float MaxHealth = 100;
 
-        public Pipe(Image image, Rectangle localBounds, IEnumerable<Vector> localOffsets, bool isGoldPipe)
+        public Pipe(Image image, Rectangle localBounds, IEnumerable<Vector> localOffsets, bool isGreyPipe, bool isGoldPipe)
         {
             Image = image;
 
@@ -26,6 +26,7 @@ namespace Superfluid.Entities
             LocalConnectPoints = localOffsets.ToArray();
             ConnectPoints = localOffsets.ToArray();
 
+            IsGreyPipe = isGreyPipe;
             IsGoldPipe = isGoldPipe;
 
             // Draw behind ground layer
@@ -40,7 +41,11 @@ namespace Superfluid.Entities
 
         public readonly Vector[] ConnectPoints;
 
+        public bool IsGreyPipe { get; }
+
         public bool IsGoldPipe { get; }
+
+        public bool IsFunctional { get; set; }
 
         public HashSet<Pipe> Connections { get; }
 
@@ -64,6 +69,7 @@ namespace Superfluid.Entities
 
             // Clamp at 0
             if (Health < 0) { Health = 0; }
+            Game.Pipes.EvaluatePipeConfiguration();
         }
 
         public void HealDamage(float amount = 5)
@@ -76,6 +82,7 @@ namespace Superfluid.Entities
 
             // Clamp at max
             if (Health > MaxHealth) { Health = MaxHealth; }
+            Game.Pipes.EvaluatePipeConfiguration();
         }
 
         public void ComputeWorldSpace()
@@ -106,13 +113,23 @@ namespace Superfluid.Entities
 
         public override void Draw(Graphics gfx, float dt)
         {
-            gfx.DrawImage(Image, Transform);
+            if (IsFunctional)
+            {
+                var px = Calc.Random.Choose(-1, 0, +1);
+                var py = Calc.Random.Choose(-1, 0, +1);
+                var wobble = Matrix.CreateTranslation(px, py);
+                gfx.DrawImage(Image, Transform * wobble);
+            }
+            else
+            {
+                gfx.DrawImage(Image, Transform);
+            }
 
             // 
             if (Health < MaxHealth)
             {
-                gfx.Color = Color.Red;
-                gfx.DrawText($"{Health}", Bounds.Center, Font.Default, 32, TextAlign.Center);
+                gfx.Color = FlatColors.Alizarin;
+                gfx.DrawText($"{Health}", Bounds.Center, Font.Default, 64, TextAlign.Center);
             }
         }
 
