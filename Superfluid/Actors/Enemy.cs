@@ -1,52 +1,87 @@
 ﻿using Heirloom.Drawing;
 
 using Superfluid.Engine;
+using Superfluid.Entities;
 
 namespace Superfluid.Actors
 {
     public abstract class Enemy : Actor
     {
-        public float CurrHealth = 0
-        ;
-        protected Enemy(Sprite sprite, float maxHealth) 
+        private bool _wasDamagedFlag = false;
+
+        protected Enemy(Sprite sprite, float maxHealth)
             : base(sprite)
         {
             SpriteNeutralFacing = FaceDirection.Left;
+
+            CurrentHealth = maxHealth;
             MaxHealth = maxHealth;
-            CurrHealth = maxHealth;
+
+            // 
+            AttackTimer = AttackDuration;
         }
 
         public float MaxHealth { get; }
-        private bool _damageTaken = false;
+
+        public float CurrentHealth { get; private set; }
+
+        public float AttackDuration { get; protected set; } = 0.5F;
+
+        public float AttackTimer { get; set; }
+
+        public float AttackPower { get; set; } = 2;
 
         public void TakeDamage(float damage)
         {
-            CurrHealth -= damage;
-            _damageTaken = true;
-            if (CurrHealth <= 0)
-                {
-                    Game.RemoveEntity(this);
-                }
+            CurrentHealth -= damage;
+            _wasDamagedFlag = true;
+
+            if (CurrentHealth <= 0)
+            {
+                Game.RemoveEntity(this);
+            }
         }
 
-        protected override void HurtUpdate(float dt) 
+        /// <summary>
+        /// Attacks the given pipe, assumes this pipe is valid.
+        /// </summary>
+        protected void AttackPipe(float dt, Pipe pipe)
         {
-            if (_damageTaken)
+            if (AdvanceAttackTimer(dt))
             {
-                if (CurrHealth <= 0)
+                // SMASH!
+                pipe.TakeDamage(AttackPower);
+            }
+        }
+
+        protected override void HurtUpdate(float dt)
+        {
+            if (_wasDamagedFlag)
+            {
+                if (CurrentHealth <= 0)
                 {
                     // TODO: some death animation
-                    
-                    
                 }
-
-                else 
+                else
                 {
                     // TODO: Damage animation
                 }
 
-                _damageTaken = false;
+                _wasDamagedFlag = false;
             }
+        }
+
+        private bool AdvanceAttackTimer(float dt)
+        {
+            AttackTimer -= dt;
+
+            if (AttackTimer <= 0)
+            {
+                AttackTimer = AttackDuration;
+                return true;
+            }
+
+            return false;
         }
     }
 }

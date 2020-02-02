@@ -5,6 +5,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Assets\Images\Tiles\**" />
     <EmbeddedResource Remove="Assets\Images\Tiles\**" />
@@ -515,6 +519,7 @@
     <None Remove="Assets\Images\Players\Yellow\alienYellow_swim2.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_walk1.png" />
     <None Remove="Assets\Images\Players\Yellow\alienYellow_walk2.png" />
+    <None Remove="Assets\Maps\AllPipes.tmx" />
     <None Remove="Assets\Maps\TestMap.tmx" />
     <None Remove="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
     <None Remove="Assets\Tilesets\Industrial.tsx" />
@@ -1011,6 +1016,7 @@
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_swim2.png" />
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk1.png" />
     <EmbeddedResource Include="Assets\Images\Players\Yellow\alienYellow_walk2.png" />
+    <EmbeddedResource Include="Assets\Maps\AllPipes.tmx" />
     <EmbeddedResource Include="Assets\Maps\TestMap.tmx" />
     <EmbeddedResource Include="Assets\Music\4222-pixelland-by-kevin-macleod.mp3" />
     <EmbeddedResource Include="Assets\Tilesets\Industrial.tsx" />

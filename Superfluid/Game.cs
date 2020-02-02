@@ -38,7 +38,7 @@ namespace Superfluid
 
         public static Image Background;
 
-        private static HashSet<Entity> _addSet, _remSet;
+        private static HashSet<Entity> _addEntities, _removeEntities;
         private static TypeDictionary<Entity> _entities;
 
         private static void Main(string[] args)
@@ -53,10 +53,8 @@ namespace Superfluid
 
                 // Create entities collection
                 _entities = new TypeDictionary<Entity>();
-
-                // 
-                _remSet = new HashSet<Entity>();
-                _addSet = new HashSet<Entity>();
+                _removeEntities = new HashSet<Entity>();
+                _addEntities = new HashSet<Entity>();
 
                 // Create the game window
                 Window = new Window("Superfluid!");
@@ -118,8 +116,8 @@ namespace Superfluid
                 throw new InvalidOperationException($"Entity already exists in scene.");
             }
 
-            _remSet.Remove(entity);
-            _addSet.Add(entity);
+            _removeEntities.Remove(entity);
+            _addEntities.Add(entity);
             return entity;
         }
 
@@ -128,13 +126,13 @@ namespace Superfluid
         /// </summary>
         public static void RemoveEntity(Entity entity)
         {
-            if (!_entities.Contains(entity))
+            if (!_entities.Contains(entity) && !_addEntities.Contains(entity))
             {
                 throw new InvalidOperationException($"Entity does not exist in scene.");
             }
 
-            _addSet.Remove(entity);
-            _remSet.Add(entity);
+            _addEntities.Remove(entity);
+            _removeEntities.Add(entity);
         }
 
         /// <summary>
@@ -147,12 +145,18 @@ namespace Superfluid
                        .FirstOrDefault();
         }
 
+        #region Load Map
+
         private static void LoadMap(string name)
         {
             // == Purge Existing Stage
 
             Spatial.Clear();
             Pipes.Clear();
+
+            // 
+            foreach (var o in FindEntities<Block>()) { RemoveEntity(o); }
+            foreach (var o in FindEntities<Pipe>()) { RemoveEntity(o); }
 
             // == Load Phase
 
@@ -318,6 +322,8 @@ namespace Superfluid
             }
         }
 
+        #endregion
+
         private static void SetCursor(string name, Color color)
         {
             // Clone image
@@ -343,17 +349,26 @@ namespace Superfluid
                           .Cast<T>();
         }
 
-        public static IEnumerable<T> FindEntities<T>() where T : Entity
+        public static T[] FindEntities<T>() where T : Entity
         {
-            return _entities.GetItemsByType<T>();
+            var items = _entities.GetItemsByType<T>();
+
+            if (_addEntities.Count > 0)
+            {
+                items = _addEntities.Where(x => x is T)
+                                    .Cast<T>()
+                                    .Concat(items);
+            }
+
+            return items.ToArray();
         }
 
         private static void OnUpdate(Graphics gfx, float dt)
         {
             // Add/Remove entities
-            foreach (var e in _remSet) { _entities.Remove(e); }
-            foreach (var e in _addSet) { _entities.Add(e); }
-            _remSet.Clear(); _addSet.Clear();
+            foreach (var e in _removeEntities) { _entities.Remove(e); }
+            foreach (var e in _addEntities) { _entities.Add(e); }
+            _removeEntities.Clear(); _addEntities.Clear();
 
             // Update Entities
             foreach (var entity in _entities)

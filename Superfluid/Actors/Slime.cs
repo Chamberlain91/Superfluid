@@ -1,17 +1,19 @@
-﻿using Heirloom.Drawing;
+﻿using System.Linq;
+
+using Heirloom.Drawing;
 using Heirloom.Math;
 
 using Superfluid.Engine;
+using Superfluid.Entities;
 
 namespace Superfluid.Actors
 {
     public class Slime : Enemy
     {
         private static readonly Sprite _sprite = CreateSprite();
-        private const float _maxHealth = 100f;
 
         public Slime()
-            : base(_sprite, _maxHealth)
+            : base(_sprite, maxHealth: 100)
         {
             // Shrink bounds a little
             LocalBounds = Rectangle.Inflate(LocalBounds, -4);
@@ -43,11 +45,29 @@ namespace Superfluid.Actors
         {
             if (Facing == FaceDirection.Left) { Velocity = (-1, Velocity.Y); }
             else { Velocity = (+1, Velocity.Y); }
+
+            // Near/Touching a pipe
+            if (Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0).Any())
+            {
+                GotoState(State.Idle);
+            }
         }
 
         protected override void IdleUpdate(float dt)
         {
-            // nada
+            Velocity = (0, Velocity.Y);
+
+            var pipes = Game.QuerySpatial<Pipe>(Bounds).Where(p => p.Health > 0);
+
+            // Not near a pipe
+            if (!pipes.Any())
+            {
+                GotoState(State.Walk);
+            }
+            else
+            {
+                AttackPipe(dt, pipes.First());
+            }
         }
 
         internal override void OnHorizontalCollision(int dir)

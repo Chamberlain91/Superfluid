@@ -12,9 +12,7 @@ namespace Superfluid.Entities
     {
         public Image Image;
 
-        private const float _maxHealth = 100;
-
-        private float _currHealth = _maxHealth - 10;
+        private const float MaxHealth = 100;
 
         public Pipe(Image image, Rectangle localBounds, IEnumerable<Vector> localOffsets, bool isGoldPipe)
         {
@@ -46,33 +44,38 @@ namespace Superfluid.Entities
 
         public HashSet<Pipe> Connections { get; }
 
+        public float Health { get; private set; } = MaxHealth;
+
         public override void Update(float dt)
         {
             // nada
         }
 
         // Called when enemies hit it
-        public void TakeDamage(float damage) {
-            if (_currHealth > 0)
+        public void TakeDamage(float damage)
+        {
+            if (IsGoldPipe) { return; }
+
+            if (Health > 0)
             {
-                _currHealth -= damage;
-            } 
-            else if (_currHealth < 0 )
-            {
-                _currHealth = 0;
+                Log.Info($"Pipe Health = {Health} (Damage {damage})");
+                Health -= damage;
             }
+
+            // Clamp at 0
+            if (Health < 0) { Health = 0; }
         }
 
-        public void HealDamage() {
-            if (_currHealth < _maxHealth)
+        public void HealDamage(float amount = 5)
+        {
+            if (Health < MaxHealth)
             {
-                _currHealth += 5;
-                Log.Info("Pipe Health = " + _currHealth);
-            } 
-            else if (_currHealth > _maxHealth)
-            {
-                _currHealth = _maxHealth;
+                Log.Info($"Pipe Health = {Health} (Heal {amount})");
+                Health += amount;
             }
+
+            // Clamp at max
+            if (Health > MaxHealth) { Health = MaxHealth; }
         }
 
         public void ComputeWorldSpace()
@@ -104,6 +107,13 @@ namespace Superfluid.Entities
         public override void Draw(Graphics gfx, float dt)
         {
             gfx.DrawImage(Image, Transform);
+
+            // 
+            if (Health < MaxHealth)
+            {
+                gfx.Color = Color.Red;
+                gfx.DrawText($"{Health}", Bounds.Center, Font.Default, 32, TextAlign.Center);
+            }
         }
 
         public override void DebugDraw(Graphics gfx)
