@@ -74,9 +74,8 @@ namespace Superfluid
                 LoadMap("testmap");
 
                 // Create the player actor
-                var player = new Player(LoadPlayerSprite());
+                var player = AddEntity(new Player());
                 player.Transform.Position = (200, 300);
-                _entities.Add(player);
 
                 // Create main loop
                 Loop = RenderLoop.Create(Window.Graphics, OnUpdate);
@@ -165,19 +164,6 @@ namespace Superfluid
             Window.SetCursor(cursor);
         }
 
-        public static Sprite LoadPlayerSprite()
-        {
-            var builder = new SpriteBuilder
-            {
-                { "walk", 0.1F, Assets.GetImages("alienpink_walk1_crop", "alienpink_walk2_crop") },
-                { "jump", 0.1F, Assets.GetImages("alienpink_jump_crop") },
-                { "idle", 5F, Assets.GetImages("alienpink_stand_crop", "alienpink_front_crop") },
-                { "hurt", 1.0F, Assets.GetImages("alienpink_hit_crop") }
-            };
-
-            return builder.CreateSprite();
-        }
-
         public static IEnumerable<T> QuerySpatial<T>(IShape shape)
             where T : ISpatialObject
         {
@@ -232,6 +218,7 @@ namespace Superfluid
 
             // Draw Entity Back (ie. Pipes...)
             DrawEntities(gfx, dt, EntityLayer.Back);
+            // Map.GetLayer("pipes").Draw(gfx); // todo: remove when the entities exist
 
             // Draw ground
             groundLayer.Draw(gfx);

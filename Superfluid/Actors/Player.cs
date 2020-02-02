@@ -17,22 +17,22 @@ namespace Superfluid.Actors
 
         private float _shootTime = ShootRate;
 
-        public Player(Sprite sprite)
-            : base(sprite)
+        public Player()
+            : base(CreatePlayerSprite())
         {
             LocalBounds = Rectangle.Inflate(LocalBounds, -10);
             LocalBounds = Rectangle.Offset(LocalBounds, (0, 10));
         }
 
-        public bool KeyLeft => Input.GetKeyDown(Key.A);
+        public bool InputLeft => Input.GetKeyDown(Key.A);
 
-        public bool KeyRight => Input.GetKeyDown(Key.D);
+        public bool InputRight => Input.GetKeyDown(Key.D);
 
-        public bool KeyJump => Input.GetKeyDown(Key.Space);
+        public bool InputJump => Input.GetKeyDown(Key.Space);
 
-        public bool KeyDown => Input.GetKeyDown(Key.S);
+        public bool InputDown => Input.GetKeyDown(Key.S);
 
-        public bool KeyShoot => Input.GetKeyDown(Key.Q);
+        public bool InputShoot => Input.GetMouseDown(0);
 
         protected override void IdleUpdate(float dt)
         {
@@ -40,7 +40,7 @@ namespace Superfluid.Actors
             DetectJump();
 
             // Movement keys differ (ie, one is pressed)
-            if (KeyLeft != KeyRight)
+            if (InputLeft != InputRight)
             {
                 GotoState(State.Walk);
             }
@@ -56,7 +56,7 @@ namespace Superfluid.Actors
         {
             _shootTime -= dt;
 
-            if (KeyShoot && _shootTime <= 0F)
+            if (InputShoot && _shootTime <= 0F)
             {
                 _shootTime = ShootRate;
 
@@ -100,9 +100,9 @@ namespace Superfluid.Actors
         private bool DetectMovement()
         {
             // Movement keys differ (ie, one is pressed)
-            if (KeyLeft != KeyRight)
+            if (InputLeft != InputRight)
             {
-                if (KeyLeft)
+                if (InputLeft)
                 {
                     Velocity = (-WalkSpeed, Velocity.Y);
                     Facing = FaceDirection.Left;
@@ -130,14 +130,14 @@ namespace Superfluid.Actors
             WantFallDown = false;
 
             // 
-            if (KeyJump)
+            if (InputJump)
             {
                 Velocity = (Velocity.X, -10);
                 GotoState(State.Jump);
             }
 
             // 
-            if (KeyDown)
+            if (InputDown)
             {
                 // GotoState(State.Jump);
                 WantFallDown = true;
@@ -162,6 +162,19 @@ namespace Superfluid.Actors
             {
                 GotoState(State.Idle);
             }
+        }
+
+        private static Sprite CreatePlayerSprite()
+        {
+            var builder = new SpriteBuilder
+            {
+                { "walk", 0.1F, Assets.GetImages("alienpink_walk1_crop", "alienpink_walk2_crop") },
+                { "jump", 0.1F, Assets.GetImages("alienpink_jump_crop") },
+                { "idle", 5F, Assets.GetImages("alienpink_stand_crop", "alienpink_front_crop") },
+                { "hurt", 1.0F, Assets.GetImages("alienpink_hit_crop") }
+            };
+
+            return builder.CreateSprite();
         }
     }
 }
