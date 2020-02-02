@@ -170,53 +170,50 @@ namespace Superfluid
             foreach (var (x, y) in Rasterizer.Rectangle(Map.Size))
             {
                 var tile = pipeLayer.GetTile(x, y);
-                if (tile == null)
-                { continue; }
+                if (tile == null) { continue; }
                 else
                 {
-                    var rect = new Rectangle(Vector.Zero, Map.TileSize);
-
                     // Offsets for pipe openings
                     var off1 = new IntVector();
                     var off2 = new IntVector();
-                    var gotOffset = false; // don't judge me lol
-                    var gold = false;
 
+                    var rect = new Rectangle(Vector.Zero, Map.TileSize);
+
+                    // Is this a pipes tile?
                     if (tile.TileSet == pipeTileset)
                     {
-                        // vertical pipe
-                        if (tile.Id == 88 || tile.Id == 100 || tile.Id == 106)
+                        // == Straight Pipes
+
+                        var VP = tile.Id == 88 || tile.Id == 100;
+                        var VG = tile.Id == 106; // vertical gold
+
+                        var HP = tile.Id == 89 || tile.Id == 101;
+                        var HG = tile.Id == 107; // horizontal gold
+
+                        // Vertical pipe
+                        if (VP || VG)
                         {
-                            off1.Set(0, -2); // bottom 
-                            off2.Set(0, 1);  // top
-                            gotOffset = true;
+                            off1.Set(0, -1);
+                            off2.Set(0, +2);
 
                             // vertical pipes are 1x2
                             rect.Size = (Size) ((Vector) rect.Size * (1, 2));
-
-                            if (tile.Id == 106)
-                            {
-                                gold = true;
-                            }
                         }
 
-                        // horizontal pipe
-                        if (tile.Id == 89 || tile.Id == 101 || tile.Id == 107)
+                        // Horizontal pipe
+                        if (HP || HG)
                         {
-                            off1.Set(-1, 0); // left
-                            off2.Set(2, 0);  // right
-                            gotOffset = true;
+                            off1.Set(-1, 0);
+                            off2.Set(+2, 0);
 
                             // vertical pipes are 1x2
                             rect.Size = (Size) ((Vector) rect.Size * (2, 1));
-
-                            if (tile.Id == 106)
-                            {
-                                gold = true;
-                            }
                         }
 
-                        // == Curved Pipes
+                        // Is this a gold (input/output) pipe?
+                        var isGoldPipe = HG || VG;
+
+                        // == Corner Pipes
 
                         var TR = tile.Id == 90 || tile.Id == 102;
                         var TL = tile.Id == 91 || tile.Id == 103;
@@ -225,34 +222,30 @@ namespace Superfluid
 
                         if (TR)
                         {
-                            // Top Left to Bottom Right
-                            off1.Set(-1, -1);
-                            off2.Set(1, 1);
-                            gotOffset = true;
+                            // Corner elbow is top-right
+                            off1.Set(-1, 0);
+                            off2.Set(+1, 2);
                         }
 
                         if (TL)
                         {
-                            // Bottom Left to Top Right (upside down L)
-                            off1.Set(0, 1);
-                            off2.Set(2, -1);
-                            gotOffset = true;
+                            // Corner elbow is top-left
+                            off1.Set(0, 2);
+                            off2.Set(2, 0);
                         }
 
                         if (BL)
                         {
-                            // Top Left to bottom Right (L)
-                            off1.Set(0, -2);
-                            off2.Set(2, 0);
-                            gotOffset = true;
+                            // Corner elbow is bottom-left
+                            off1.Set(0, -1);
+                            off2.Set(2, +1);
                         }
 
                         if (BR)
                         {
-                            // Bottom Left to Top Right (Backwards L)
-                            off1.Set(-1, 0);
-                            off2.Set(1, -2);
-                            gotOffset = true;
+                            // Corner elbow is bottom-right
+                            off1.Set(-1, +1);
+                            off2.Set(+1, -1);
                         }
 
                         // Corner pipes are 2x2
@@ -260,18 +253,17 @@ namespace Superfluid
                         {
                             rect.Size *= 2;
                         }
-                    }
 
-                    if (gotOffset)
-                    {
                         // Compute Block Position
                         var pos = new Vector(x, y) * (Vector) Map.TileSize;
-                        pos.Y += Map.TileSize.Height - tile.Image.Height;
+                        pos.Y += Map.TileSize.Height - tile.Image.Height; // weird tiled offset thing
 
-                        var pipe = AddEntity(new Pipe(tile.Image, rect, off1, off2, gold));
+                        // Create and add pipe entity
+                        var pipe = AddEntity(new Pipe(tile.Image, rect, off1, off2, isGoldPipe));
                         pipe.Transform.Position = pos;
-                        pipe.ComputeWorldBounds();
 
+                        // Insert pipe into spatial structure
+                        pipe.ComputeWorldBounds();
                         Spatial.Add(pipe, pipe.Bounds);
                     }
                 }
