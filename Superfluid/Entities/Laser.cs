@@ -12,10 +12,13 @@ namespace Superfluid.Entities
     {
         public Image Image { get; }
 
-        public Laser()
+        private bool IsBloodThirsty { get; }
+        
+        public Laser(bool isBloodThirsty)
         {
             Image = Assets.GetImage("particlewhite_4");
             Transform.Scale = (0.2F, 0.2F);
+            IsBloodThirsty = isBloodThirsty;
         }
 
         public override void Update(float dt)
@@ -47,32 +50,33 @@ namespace Superfluid.Entities
                 AddSparks();
             }
 
+            if (!IsBloodThirsty) {
             // Collides with pipe -> Repair
-            if (pipes.Any())
-            {
-                // TODO: 
-                AddSparks();
-
-                foreach (Pipe p in pipes)
+                if (pipes.Any())
                 {
-                    p.HealDamage();
+                    // TODO: 
+                    AddSparks();
+
+                    foreach (Pipe p in pipes)
+                    {
+                        p.HealDamage();
+                    }
+                }
+            } 
+            else {
+                // Colides with enemy -> damage
+                if(enemies.Any())
+                {
+                    // TODO: Damage enemies
+                    AddSparks();
+                    
+                    foreach (Enemy e in enemies)
+                    {
+                        e.TakeDamage(34);
+                    }
+                    
                 }
             }
-
-            // Colides with enemy -> damage
-            if(enemies.Any())
-            {
-                // TODO: Damage enemies
-                AddSparks();
-                
-                foreach (Enemy e in enemies)
-                {
-                    e.TakeDamage(34);
-                }
-                
-            }
-
-
         }
 
         public override void Draw(Graphics gfx, float dt)
