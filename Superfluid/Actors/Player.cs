@@ -63,6 +63,9 @@ namespace Superfluid.Actors
             // Stop horizontal motion
             Velocity = (0, Velocity.Y);
 
+            // Gun Mode input
+            DetectGunMode();
+
             // Shooting input
             DetectShoot(dt);
 
@@ -131,6 +134,9 @@ namespace Superfluid.Actors
                 GotoState(State.Idle);
             }
 
+            // Gun Mode input
+            DetectGunMode();
+
             // Shooting input
             DetectShoot(dt);
 
@@ -142,6 +148,7 @@ namespace Superfluid.Actors
         {
             WantFallDown = false;
             DetectMovement();
+            DetectGunMode();
             DetectShoot(dt);
             DetectPickUp();
         }
