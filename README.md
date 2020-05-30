@@ -4,4 +4,4 @@ In early 2020, I attended a game jam called "Game With Us". A friend and I devel
 
 Here is a little video snippet of the game.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/aG_bmil0cTg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[<img src="https://img.youtube.com/vi/aG_bmil0cTg/maxresdefault.jpg">](https://youtu.be/aG_bmil0cTg)
